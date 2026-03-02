@@ -19,72 +19,79 @@ class SupportController extends GetxController {
   TextEditingController descriptionController = TextEditingController();
 
   String selectedProjectId = "";
+  String selectedJobId = "";
   String selectedCategory = "";
   String selectedStatus = "completed";
 
-  List<dynamic> projectList = [];
+  // List<dynamic> projectList = [];
+
+  List<ProjectItem> projectList = [];
   bool isProjectLoading = false;
 
   String? authToken;
 
   @override
   void onInit() {
-    fetchSupportProjects();   // 👈 load default completed projects
+    fetchSupportProjects();   
     super.onInit();
   }
 
 
-  Future<void> fetchSupportProjects() async {
-    isProjectLoading = true;
-    update();
+ Future<void> fetchSupportProjects() async {
+  isProjectLoading = true;
+  update();
 
-    authToken = await TokenService.getToken();
+  authToken = await TokenService.getToken(); 
 
-    Map<String, String> body = {
-      "status": selectedStatus,
-    };
+  Map<String, String> body = {
+    "status": selectedStatus,
+  };
 
-    callWebApi(
-      tickerProvider,
-      ApiEndpoints.supportProjects,
-      body,
-      token: authToken,
-      onResponse: (response) {
-        final decoded = jsonDecode(response.body);
+  callWebApi(
+    tickerProvider,
+    ApiEndpoints.supportProjects,
+    body,
+    token: authToken,
+    onResponse: (response) {
+      final decoded = jsonDecode(response.body);
 
-        SupportProjectResponseModel model =
-            SupportProjectResponseModel.fromJson(decoded);
+      SupportProjectResponseModel model =
+          SupportProjectResponseModel.fromJson(decoded);
 
-        if (model.status == "success") {
-          projectList = model.data?.result ?? [];
-        }
+      if (model.status == "success") {
+        projectList = model.data?.result ?? [];
 
-        isProjectLoading = false;
-        update();
-      },
-      onError: (error) {
-        isProjectLoading = false;
-        update();
-      },
-    );
-  }
+     
+        selectedProjectId = "";
+        selectedJobId = "";
+      }
 
-
+      isProjectLoading = false;
+      update();
+    },
+    onError: (error) {
+      isProjectLoading = false;
+      update();
+    },
+  );
+}
   Future<void> submitSupport() async {
     if (selectedProjectId.isEmpty) {
-      
-      Get.snackbar("Error", "Please select project");
+        Utils.showToast("Error: Please select project");
+      //Get.snackbar("Error: ${selectedProjectId.isEmpty}");
       return;
     }
 
     if (selectedCategory.isEmpty) {
-      Get.snackbar("Error", "Please select category");
+       Utils.showToast("Error: Please select category");
+      //Get.snackbar("Error", "Please select category");
       return;
     }
-
+ 
     if (descriptionController.text.trim().isEmpty) {
-      Get.snackbar("Error", "Please enter message");
-      return;
+       Utils.showToast("Error: Please enter message");
+      //Get.snackbar("Error", "Please enter message");
+      return;  
     }
 
     authToken = await TokenService.getToken();
@@ -93,7 +100,7 @@ class SupportController extends GetxController {
       "project_id": selectedProjectId,
       "category": selectedCategory,
       "message": descriptionController.text.trim(),
-    };
+    }; 
 
     callWebApi(
       tickerProvider,
@@ -112,6 +119,7 @@ class SupportController extends GetxController {
           selectedCategory = "";
           selectedProjectId = "";
           descriptionController.clear();
+          Get.back();
 
           update();
         } else {

@@ -58,19 +58,29 @@ Row(
       value: "completed",
       groupValue: controller.selectedStatus,
       onChanged: (value) {
-        controller.selectedStatus = value!;
-        controller.fetchSupportProjects();  // 👈 CALL API
-      },
+  controller.selectedStatus = value!;
+
+  // 🔥 Clear old selection
+  controller.selectedProjectId = "";
+  controller.selectedJobId = "";
+
+  controller.fetchSupportProjects();
+},
     ),
     const Text("Completed"),
 
     Radio<String>(
       value: "in_progress",
       groupValue: controller.selectedStatus,
-      onChanged: (value) {
-        controller.selectedStatus = value!;
-        controller.fetchSupportProjects();  // 👈 CALL API
-      },
+    onChanged: (value) {
+  controller.selectedStatus = value!;
+
+  // 🔥 Clear old selection
+  controller.selectedProjectId = "";
+  controller.selectedJobId = "";
+
+  controller.fetchSupportProjects(); 
+},
     ),
     const Text("In Progress"),
   ],
@@ -85,20 +95,25 @@ Utils.textView(
 const SizedBox(height: 8),
 
 SearchableDropdown(
+  key: ValueKey(controller.selectedStatus), // 🔥 IMPORTANT
   hint: "Select Project",
-  value: controller.selectedProjectId.isEmpty
+  value: controller.selectedJobId.isEmpty
       ? null
-      : controller.selectedProjectId,
+      : controller.selectedJobId,
   items: controller.projectList
-      .map((e) => e['id'].toString())
+      .map((e) => e.jobId ?? "")
       .toList(),
   onSelected: (val) {
-    controller.selectedProjectId = val!;
+    final selectedProject = controller.projectList
+        .firstWhere((e) => e.jobId == val);
+
+    controller.selectedJobId = selectedProject.jobId ?? ""; 
+    controller.selectedProjectId =
+        selectedProject.projectId.toString();
+
     controller.update();
   },
 ),
-
-
        const SizedBox(height: 20),
                   Utils.textView(
                     "Category",

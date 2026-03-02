@@ -12,6 +12,7 @@ import 'package:surveyor_app_planzaa/common/common_text_field.dart';
 import 'package:surveyor_app_planzaa/common/custom_colors.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/controller/login_controller.dart';
+import 'package:surveyor_app_planzaa/pages/changePassword.dart';
 import 'package:surveyor_app_planzaa/pages/sign_up_page.dart';
 
 
@@ -183,14 +184,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
     TextButton(
       onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => ForgotPasswordPage(),
-          //   ),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChangePassword(),
+            ),
+          );
       },
-      child: Utils.textView(
+      child: Utils.textView( 
         "Forgot Password?",
         Get.height * 0.018,
         CustomColors.boxColor,
@@ -263,5 +264,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         ),
       ),
     );
+  
+  
+  
   }
 }

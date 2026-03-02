@@ -19,4 +19,7 @@ class ApiEndpoints {
   static const earnings = "$baseUrl/earnings";
    static const supportProjects = "$baseUrl/support-projects";
   static const support = "$baseUrl/support";
+  static const changePassword = "$baseUrl/change-password";
+  static const forgotVerifyOtp = "$baseUrl/forgot-verify-otp";
+    static const forgotPassword = "$baseUrl/forgot-password";
 }

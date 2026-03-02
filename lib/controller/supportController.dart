@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
 import 'package:surveyor_app_planzaa/core/storage/token_services.dart';
+import 'package:surveyor_app_planzaa/modal/service_project_response_model.dart';
 import 'package:surveyor_app_planzaa/modal/support_response_model.dart';
 
 class SupportController extends GetxController {
@@ -16,24 +18,61 @@ class SupportController extends GetxController {
 
   TextEditingController descriptionController = TextEditingController();
 
-String selectedProjectId = "";
-String selectedCategory = "";
+  String selectedProjectId = "";
+  String selectedCategory = "";
+  String selectedStatus = "completed";
 
-  List<ProjectModel> projectList = [];
+  List<dynamic> projectList = [];
   bool isProjectLoading = false;
 
-  // bool isLoading = false;
   String? authToken;
 
   @override
-void onInit() {
-  //fetchProjects();
-  super.onInit();
-}
+  void onInit() {
+    fetchSupportProjects();   // 👈 load default completed projects
+    super.onInit();
+  }
 
-  Future<void> submitSupport() async { 
 
+  Future<void> fetchSupportProjects() async {
+    isProjectLoading = true;
+    update();
+
+    authToken = await TokenService.getToken();
+
+    Map<String, String> body = {
+      "status": selectedStatus,
+    };
+
+    callWebApi(
+      tickerProvider,
+      ApiEndpoints.supportProjects,
+      body,
+      token: authToken,
+      onResponse: (response) {
+        final decoded = jsonDecode(response.body);
+
+        SupportProjectResponseModel model =
+            SupportProjectResponseModel.fromJson(decoded);
+
+        if (model.status == "success") {
+          projectList = model.data?.result ?? [];
+        }
+
+        isProjectLoading = false;
+        update();
+      },
+      onError: (error) {
+        isProjectLoading = false;
+        update();
+      },
+    );
+  }
+
+
+  Future<void> submitSupport() async {
     if (selectedProjectId.isEmpty) {
+      
       Get.snackbar("Error", "Please select project");
       return;
     }
@@ -48,9 +87,6 @@ void onInit() {
       return;
     }
 
-    tickerProvider;
-    update();
-
     authToken = await TokenService.getToken();
 
     Map<String, String> data = {
@@ -64,81 +100,27 @@ void onInit() {
       ApiEndpoints.support,
       data,
       token: authToken,
-      onResponse: (http.Response response) {
-        try {
-          final decoded = jsonDecode(response.body);
+      onResponse: (response) {
+        final decoded = jsonDecode(response.body);
 
-          SupportResponseModel model =
-              SupportResponseModel.fromJson(decoded);
+        SupportResponseModel model =
+            SupportResponseModel.fromJson(decoded);
 
-          if (model.status == "success") {
-              Utils.showToast("Support Submitted Successfully");
-            Get.snackbar("Success", model.message ?? "Submitted");
+        if (model.status == "success") {
+          Utils.showToast("Support Submitted Successfully");
 
-            selectedCategory = "";
-            selectedProjectId = "";
-            descriptionController.clear();
-            update();
-          } else {
-              Utils.showToast(model.message.toString());
-           // Get.snackbar("Error", model.message ?? "Something went wrong");
-          }
-        } catch (e) {
-          Utils.print(e.toString());
+          selectedCategory = "";
+          selectedProjectId = "";
+          descriptionController.clear();
+
+          update();
+        } else {
+          Utils.showToast(model.message ?? "Error");
         }
-
-        tickerProvider;
-        update();
       },
       onError: (error) {
-       tickerProvider;
-        update();
         Utils.print(error.toString());
       },
     );
   }
-
-
-
-
-// Future<void> fetchProjects() async {
-//   isProjectLoading = true;
-//   update();
-
-//   authToken = await TokenService.getToken();
-
-//   if (authToken == null || authToken!.isEmpty) {
-//     isProjectLoading = false;
-//     update();
-//     Get.snackbar("Error", "Token not found");
-//     return;
-//   }
-
-//   callWebApiGet(
-//     tickerProvider,
-//     ApiEndpoints.projects,
-//     token: authToken!,
-//     onResponse: (response) {
-//       final decoded = jsonDecode(response.body);
-
-//       if (decoded['status'] == "success") {
-
-//         List data = decoded['data']['result'];
-
-//         projectList =
-//             data.map((e) => ProjectModel.fromJson(e)).toList();
-//       }
-
-//       isProjectLoading = false;
-//       update();
-//     },
-//     onError: (error) {
-//       isProjectLoading = false;
-//       update();
-//     },
-//   );
-// }
-
-
 }
-

@@ -34,7 +34,7 @@ class _SupportScreenState extends State<SupportScreen>
     'Other / General query',
   ];
 
-String selectedStatus = "completed";
+// String selectedStatus = "completed";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,36 +52,27 @@ String selectedStatus = "completed";
                   SizedBox( height: Get.height * 0.02,),
 
 Row(
-  // mainAxisAlignment: MainAxisAlignment.start,
   children: [
 
-    
     Radio<String>(
       value: "completed",
-      groupValue: selectedStatus,
+      groupValue: controller.selectedStatus,
       onChanged: (value) {
-        setState(() {
-          selectedStatus = value!;
-        });
+        controller.selectedStatus = value!;
+        controller.fetchSupportProjects();  // 👈 CALL API
       },
     ),
     const Text("Completed"),
 
-      
     Radio<String>(
       value: "in_progress",
-      groupValue: selectedStatus,
+      groupValue: controller.selectedStatus,
       onChanged: (value) {
-        setState(() {
-          selectedStatus = value!;
-        });
+        controller.selectedStatus = value!;
+        controller.fetchSupportProjects();  // 👈 CALL API
       },
     ),
     const Text("In Progress"),
-
-    const SizedBox(width: 20),
-
-
   ],
 ),
 Utils.textView(
@@ -93,14 +84,16 @@ Utils.textView(
 
 const SizedBox(height: 8),
 
-      SearchableDropdown(
-  hint: "Select Category",
-  value: controller.selectedCategory.isEmpty
+SearchableDropdown(
+  hint: "Select Project",
+  value: controller.selectedProjectId.isEmpty
       ? null
-      : controller.selectedCategory,
-  items: categories,
+      : controller.selectedProjectId,
+  items: controller.projectList
+      .map((e) => e['id'].toString())
+      .toList(),
   onSelected: (val) {
-    controller.selectedCategory = val;
+    controller.selectedProjectId = val!;
     controller.update();
   },
 ),
@@ -155,9 +148,9 @@ const SizedBox(height: 8),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {
-                              //controller.submitSupport();
-                            },
+                     onPressed: () {
+  controller.submitSupport();
+},
                       child:  const Text(
                               "Submit",
                               style: TextStyle(

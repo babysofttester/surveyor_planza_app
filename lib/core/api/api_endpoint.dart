@@ -17,5 +17,6 @@ class ApiEndpoints {
   static const workUpload = "$baseUrl/work-upload";
   static const workHistory = "$baseUrl/work-history";
   static const earnings = "$baseUrl/earnings";
+   static const supportProjects = "$baseUrl/support-projects";
   static const support = "$baseUrl/support";
 }

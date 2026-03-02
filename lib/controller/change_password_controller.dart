@@ -22,7 +22,7 @@ class ChangePasswordController extends GetxController {
 
     if (phoneController.text.isEmpty) {
       Utils.showToast("Error: Please enter Phone Number");
-      // Get.snackbar("Error", "Please enter phone number");
+   
       return;
     }
 
@@ -46,19 +46,19 @@ class ChangePasswordController extends GetxController {
 
         if (model.status == "success") {
         Utils.showToast("Success: ${model.message ?? "OTP Sent"}");
-          // Get.snackbar("Success", model.message ?? "OTP Sent"); 
+       
 
           
           Get.to(() => OtpVerify(email: '', name: '', phone: '', password: '', confirmPassword: '',));
 
         } else {
            Utils.showToast("Error: ${model.message ?? "Something went wrong"}");
-          // Get.snackbar("Error", model.message ?? "Something went wrong");
+          
         }
       },
       onError: (error) {
         Utils.showToast("Error: ${error.toString()}");
-        // Get.snackbar("Error", error.toString());
+        
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
 import 'package:surveyor_app_planzaa/core/storage/token_services.dart';
@@ -20,7 +21,8 @@ class ChangePasswordController extends GetxController {
   Future<void> sendOtp() async {
 
     if (phoneController.text.isEmpty) {
-      Get.snackbar("Error", "Please enter phone number");
+      Utils.showToast("Error: Please enter Phone Number");
+      // Get.snackbar("Error", "Please enter phone number");
       return;
     }
 
@@ -43,18 +45,20 @@ class ChangePasswordController extends GetxController {
             ForgotPasswordResponseModel.fromJson(decoded);
 
         if (model.status == "success") {
-
-          Get.snackbar("Success", model.message ?? "OTP Sent"); 
+        Utils.showToast("Success: ${model.message ?? "OTP Sent"}");
+          // Get.snackbar("Success", model.message ?? "OTP Sent"); 
 
           
           Get.to(() => OtpVerify(email: '', name: '', phone: '', password: '', confirmPassword: '',));
 
         } else {
-          Get.snackbar("Error", model.message ?? "Something went wrong");
+           Utils.showToast("Error: ${model.message ?? "Something went wrong"}");
+          // Get.snackbar("Error", model.message ?? "Something went wrong");
         }
       },
       onError: (error) {
-        Get.snackbar("Error", error.toString());
+        Utils.showToast("Error: ${error.toString()}");
+        // Get.snackbar("Error", error.toString());
       },
     );
   }

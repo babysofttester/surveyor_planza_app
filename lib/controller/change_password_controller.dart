@@ -44,9 +44,9 @@ class ChangePasswordController extends GetxController {
 
         if (model.status == "success") {
 
-          Get.snackbar("Success", model.message ?? "OTP Sent");
+          Get.snackbar("Success", model.message ?? "OTP Sent"); 
 
-          // Navigate to OTP screen if needed
+          
           Get.to(() => OtpVerify(email: '', name: '', phone: '', password: '', confirmPassword: '',));
 
         } else {

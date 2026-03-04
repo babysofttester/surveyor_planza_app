@@ -69,6 +69,7 @@ RxBool isPasswordVisible = false.obs;
         phone: phone,
         password: password,
         confirmPassword: confirmPassword,
+        isForgotFlow: false,
       ));
 
     } else {

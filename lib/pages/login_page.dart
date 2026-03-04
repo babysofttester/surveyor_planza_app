@@ -33,11 +33,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     loginController = Get.put(LoginController(this));
   }
 
-  @override
-  void dispose() {
-    Get.delete<LoginController>();
-    super.dispose();
-  }
+// @override
+// void dispose() {
+//   loginController.emailController.dispose();
+//   loginController.passwordController.dispose();
+//   super.dispose();
+// }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +188,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChangePassword(),
+              builder: (context) => ChangePassword(phone: loginController.emailController.text,),
             ),
           );
       },

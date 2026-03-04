@@ -15,6 +15,7 @@ class OtpVerify extends StatefulWidget {
   final String? phone;
   final String? password;
   final String? confirmPassword;
+  final bool isForgotFlow;
 
   const OtpVerify({
     super.key,
@@ -23,6 +24,7 @@ class OtpVerify extends StatefulWidget {
     required this.phone,
     required this.password,
     required this.confirmPassword,
+    required this.isForgotFlow,
   });
 
   @override
@@ -35,7 +37,10 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    otpVerifyController = Get.put(OtpVerifyController(widget.email, this));
+    // pass the additional flag expected by the controller (e.g. forgot‐password flow)
+    otpVerifyController = Get.put(
+      OtpVerifyController(widget.email, this, widget.isForgotFlow),
+    );
   }
 
   // 6 controllers for 6 OTP digits
@@ -139,7 +144,7 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.8),
                                 blurRadius: 8,
-                                offset: const Offset(0, 2), 
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -158,7 +163,7 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
                             ],
                             decoration: const InputDecoration(
                               counterText: "",
-                              border: InputBorder.none, 
+                              border: InputBorder.none,
                             ),
                             onChanged: (value) {
                               if (value.isNotEmpty) {
@@ -198,10 +203,10 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                          //  backgroundColor: Colors.blue,
+                            //  backgroundColor: Colors.blue,
                             backgroundColor: otpVerifyController.canResend.value
-                            ? const Color(0xFF3AAFA9)
-                            : Colors.grey, // disabled color
+                                ? const Color(0xFF3AAFA9)
+                                : Colors.grey, // disabled color
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 8,
@@ -241,7 +246,7 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
                         ),
                         onPressed: () {
                           String otp = _otpControllers
-                              .map((controller) => controller.text) 
+                              .map((controller) => controller.text)
                               .join();
 
                           otpVerifyController.verifyOtp(

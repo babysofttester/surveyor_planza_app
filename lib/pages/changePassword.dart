@@ -8,7 +8,7 @@ import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/controller/change_password_controller.dart';
 
 class ChangePassword extends StatefulWidget {
-  const ChangePassword({super.key});
+  const ChangePassword({super.key, required String phone});
 
   @override
   State<ChangePassword> createState() => _ChangePasswordState();

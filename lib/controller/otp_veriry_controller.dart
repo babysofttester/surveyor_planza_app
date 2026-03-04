@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -12,10 +11,8 @@ import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart' as api;
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
 import 'package:surveyor_app_planzaa/modal/login_response_model.dart';
-import 'package:surveyor_app_planzaa/pages/home.dart';
+import 'package:surveyor_app_planzaa/pages/confirm_password.dart';
 import 'package:surveyor_app_planzaa/pages/kyc_screen.dart';
-
-
 
 class OtpVerifyController extends GetxController {
   late String authToken;
@@ -25,16 +22,14 @@ class OtpVerifyController extends GetxController {
   final secondsRemaining = 30.obs;
   final canResend = false.obs;
 
-
-
-
   static const String resendOtpUrl = '';
 
   String email;
+  final bool isForgotFlow;
 
-  OtpVerifyController(this.email, this._tickerProvider);
+  OtpVerifyController(this.email, this._tickerProvider, this.isForgotFlow);
 
-   Rx<LoginResponseModel> loginResponseModel = LoginResponseModel().obs;
+  Rx<LoginResponseModel> loginResponseModel = LoginResponseModel().obs;
 
   @override
   Future<void> onInit() async {
@@ -70,9 +65,7 @@ class OtpVerifyController extends GetxController {
       onResponse: (http.Response response) async {
         var responseJson = jsonDecode(response.body);
         try {
-          loginResponseModel.value = LoginResponseModel.fromJson(
-            responseJson,
-          );
+          loginResponseModel.value = LoginResponseModel.fromJson(responseJson);
           if (loginResponseModel.value.status == "success") {
           } else if (loginResponseModel.value.error == null ||
               loginResponseModel.value.error == "") {
@@ -90,56 +83,66 @@ class OtpVerifyController extends GetxController {
       token: "",
     );
   }
+
   // ---------------- VERIFY OTP ----------------
-Future<void> verifyOtp({
-  required String otp,
-  required String name,
-  required String phone,
-  required String password,
-}) async {
-    String fcmToken = prefs.getString(Constants.fcmToken) ?? "abc";
+  Future<void> verifyOtp({
+    required String otp,
+    required String name,
+    required String phone,
+    required String password,
+  }) async {
+    if (otp.length != 6) {
+      Utils.showToast("Please enter valid 6-digit OTP");
+      return;
+    }
 
-  if (otp.length != 6) {
-    Utils.showToast("Please enter valid 6-digit OTP");
-    return;
+    Map<String, String> data;
+
+    if (isForgotFlow) {
+      // FORGOT PASSWORD FLOW
+      data = {"phone": phone.trim(), "otp": otp.trim()};
+    } else {
+      // REGISTER FLOW
+      String fcmToken = prefs.getString(Constants.fcmToken) ?? "abc";
+
+      data = {
+        "email": email.trim(),
+        "name": name.trim(),
+        "phone": phone.trim(),
+        "password": password.trim(),
+        "password_confirmation": password.trim(),
+        "otp": otp.trim(),
+        "fcm_token": fcmToken,
+      };
+    }
+
+    callMultipartWebApi(
+      _tickerProvider,
+      isForgotFlow ? ApiEndpoints.forgotVerifyOtp : ApiEndpoints.verifyOtp,
+      data,
+      [],
+      onResponse: (response) async {
+        final responseJson = jsonDecode(response.body);
+        print(responseJson);
+
+        if (response.statusCode == 200 && responseJson["status"] == "success") {
+          if (isForgotFlow) {
+            
+            Get.to(
+              () => ConfirmPassword(
+                userId: responseJson["data"]["user"]["id"].toString(),
+              ),
+            );
+          } else {
+            final token = responseJson["data"]["token"] ?? "";
+            await prefs.setString("auth_token", token);
+            Get.to(() => KycScreen());
+          }
+        } else {
+          Utils.showToast(responseJson["message"] ?? "Verification failed");
+        }
+      },
+      token: '',
+    );
   }
- 
-  Map<String, String> data = {
-    "email": email.trim(),
-    "name": name.trim(),
-    "phone": phone.trim(),
-    "password": password.trim(),
-    "password_confirmation": password.trim(),
-    "otp": otp.trim(),
-    "fcm_token": fcmToken,
-  };
-
-  callMultipartWebApi(
-    _tickerProvider, 
-    ApiEndpoints.verifyOtp,
-    data,
-    [],
-    onResponse: (response) async {
-      final responseJson = jsonDecode(response.body);
-
-      if (response.statusCode == 200 &&
-          responseJson["status"] == "success") {
-
-        final token = responseJson["data"]["token"] ?? "";
-        await prefs.setString("auth_token", token);
-
-        Utils.showToast(responseJson["message"] ?? "OTP Verified");
-
-        Get.to(() => KycScreen());
-
-      } else {
-        Utils.showToast(
-            responseJson["message"] ?? "Verification failed");
-      }
-    }, 
-    
-    token: '',
-  );
-}
-
 }

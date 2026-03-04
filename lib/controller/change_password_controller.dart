@@ -49,8 +49,14 @@ class ChangePasswordController extends GetxController {
        
 
           
-          Get.to(() => OtpVerify(email: '', name: '', phone: '', password: '', confirmPassword: '',));
-
+         Get.to(() => OtpVerify(
+  email: '',
+  name: '',
+  phone: phoneController.text.trim(),
+  password: '',
+  confirmPassword: '',
+  isForgotFlow: true,
+));
         } else {
            Utils.showToast("Error: ${model.message ?? "Something went wrong"}");
           

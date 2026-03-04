@@ -31,7 +31,7 @@ class Data {
 
   Data({this.userId});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<String, dynamic> json) { 
     userId = json['user_id'];
   }
 

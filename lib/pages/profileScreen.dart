@@ -24,13 +24,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
-    with TickerProviderStateMixin {
-  late final ProfileController controller;
+   with TickerProviderStateMixin {
+  late final ProfileController controller; 
   final ImagePicker _picker = ImagePicker();
 
 @override
 void initState() {
   super.initState();
+ 
+  if (Get.isRegistered<ProfileController>()) {
+    Get.delete<ProfileController>(force: true); 
+  }
   controller = Get.put(ProfileController(this));
 }
 

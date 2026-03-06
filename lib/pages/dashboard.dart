@@ -221,8 +221,7 @@ _buildActionButtons(job),
     );
   }
 
-  Widget _buildActionButtons(JobRequest job) {
-
+Widget _buildActionButtons(JobRequest job) {
 
   if (job.status == "rejected") {
     return Align(
@@ -230,73 +229,51 @@ _buildActionButtons(job),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.grey,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: null,
-        child: Utils.textView(
-          "Rejected",
-          Get.width * 0.035,
-          CustomColors.white,
-          FontWeight.w700,
-        ),
+        child: Utils.textView("Rejected", Get.width * 0.035, CustomColors.white, FontWeight.w700),
       ),
     );
   }
-
 
   if (job.status == "accepted") {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: CustomColors.btnColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    final remainingRx = dashboardController.remainingTimeMap[job.projectId ?? 0];
+
+    if (remainingRx == null) return const SizedBox();
+
+    return Obx(() {
+      final isExpired = remainingRx.value.inSeconds <= 0;
+
+      if (isExpired) return const SizedBox(); 
+
+      return Align(
+        alignment: Alignment.centerRight,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: CustomColors.btnColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
+          onPressed: () => dashboardController.updateJobStatus(
+            job.projectId ?? 0, job.bookingNo ?? "", "pending"),
+          child: Utils.textView("Inprogress", Get.width * 0.035, CustomColors.white, FontWeight.w700),
         ),
-        onPressed: () {
-          dashboardController.updateJobStatus(
-            job.projectId ?? 0,
-            job.bookingNo ?? "",
-            "pending",
-          );
-        },
-        child: Utils.textView(
-          "Inprogress",
-          Get.width * 0.035,
-          CustomColors.white,
-          FontWeight.w700,
-        ),
-      ),
-    );
+      );
+    });
   }
 
- 
+  // ✅ Default - Accept/Reject
   return Row(
     children: [
       Expanded(
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF2F3E8C),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          onPressed: () {
-            dashboardController.updateJobStatus(
-              job.projectId ?? 0,
-              job.bookingNo ?? "",
-              "accepted",
-            );
-          },
-          child: Utils.textView(
-            "Accept",
-            Get.width * 0.035,
-            CustomColors.white,
-            FontWeight.w700,
-          ),
+          onPressed: () => dashboardController.updateJobStatus(
+            job.projectId ?? 0, job.bookingNo ?? "", "accepted"),
+          child: Utils.textView("Accept", Get.width * 0.035, CustomColors.white, FontWeight.w700),
         ),
       ),
       const SizedBox(width: 10),
@@ -304,23 +281,11 @@ _buildActionButtons(job),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: CustomColors.btnColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          onPressed: () {
-            dashboardController.updateJobStatus(
-              job.projectId ?? 0,
-              job.bookingNo ?? "",
-              "rejected",
-            );
-          },
-          child: Utils.textView(
-            "Reject",
-            Get.width * 0.035,
-            CustomColors.white,
-            FontWeight.w700,
-          ),
+          onPressed: () => dashboardController.updateJobStatus(
+            job.projectId ?? 0, job.bookingNo ?? "", "rejected"),
+          child: Utils.textView("Reject", Get.width * 0.035, CustomColors.white, FontWeight.w700),
         ),
       ),
     ],

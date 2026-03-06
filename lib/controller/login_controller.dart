@@ -20,6 +20,7 @@ class LoginController extends GetxController {
   final TickerProvider _tickerProvider;
 
   LoginController(this._tickerProvider);
+  
 
   final emailController = TextEditingController();
   // final isLoading = false.obs;
@@ -75,13 +76,14 @@ Future<void> login() async {
   };
 
   callWebApi(
+  //  null,
   _tickerProvider,
   ApiEndpoints.login,
   data,
   onResponse: (http.Response response) async {
     var responseJson = jsonDecode(response.body);
-
-    loginResponseModel.value =
+try{
+loginResponseModel.value =
         LoginResponseModel.fromJson(responseJson);
 
     if (response.statusCode == 200 &&
@@ -90,19 +92,51 @@ Future<void> login() async {
       String token =
           loginResponseModel.value.data?.token ?? "";
 
-      // await prefs.setString("auth_token", token);
+     
       await prefs.setString(Constants.AUTH_TOKEN, token);
-      
+      await prefs.setInt(Constants.IS_LOGGED_IN, 1); 
+      await prefs.setString(Constants.KEY_LOGIN_RESPONSE, jsonEncode(responseJson)); 
+    
 
       await handleRememberMe();
 
       Utils.showToast(loginResponseModel.value.message ?? "Login Success");
 
+int isVerified = loginResponseModel.value.data?.isVerified ?? 0;
+int isRejected = loginResponseModel.value.data?.isRejected ?? 0;
+int isPending = loginResponseModel.value.data?.isPending ?? 0;
 
-      // Get.to(()=>KycScreen());
-      Get.offAll(() => Home());
-     //Get.offAll(() => KycScreen());
+if (isVerified == 1) {
 
+  
+  Get.offAll(() => Home());
+
+} else if (isRejected == 1) {
+
+
+  Get.offAll(() => const KycScreen());
+
+} else if (isPending == 1) {
+
+  
+  
+  Utils.showToast(
+    "Your KYC verification is currently under review. "
+    "Please wait until our team verifies your documents."
+  ); 
+
+} else {
+
+  
+  Get.offAll(() => const KycScreen());
+ 
+}
+      
+      // Get.offAll(() => Home());
+    
+print("isVerified: $isVerified");
+print("isRejected: $isRejected");
+print("isPending: $isPending");
     } else {
      
       Utils.showToast(
@@ -110,6 +144,13 @@ Future<void> login() async {
         "Invalid credentials or account inactive",
       );
     }
+}catch (e){
+          LoaderManager.hideLoader();
+          e.printError();
+          e.printInfo();
+          Utils.print(e.toString());
+}
+    Utils.print("log in controller %%%%%%%%%%%%%%%%%%%% ");
   },
   token: authToken,
 );

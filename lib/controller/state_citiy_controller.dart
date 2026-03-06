@@ -1,21 +1,18 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
-import 'package:get/get_connect/http/src/response/response.dart' as http;
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:get/get_utils/src/extensions/dynamic_extensions.dart';
+import 'package:get/get.dart';          
+import 'package:http/http.dart' as http; 
 import 'package:surveyor_app_planzaa/common/load_manager.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
 import 'package:surveyor_app_planzaa/core/storage/token_services.dart';
-
+  
 class StateCityController extends GetxController {
-  final TickerProvider _tickerProvider;
+  
 
 
-  StateCityController(this._tickerProvider);
+  StateCityController(); 
 
  
   final RxList<String> cities = <String>[].obs;
@@ -39,8 +36,10 @@ print("STATE TOKEN: $token");
     return;
   }
   callWebApiGet( 
-    _tickerProvider,
+    null,
     ApiEndpoints.getStates,
+       showLoader: false, 
+      hideLoader: false,
     onResponse: (http.Response response) async {
 
       print("STATUS: ${response.statusCode}");
@@ -83,9 +82,11 @@ Future<void> fetchCities(String state) async {
   };
 
   callWebApi(
-    _tickerProvider,
+   null,
     ApiEndpoints.getCities,
     data,
+       showLoader: false, 
+      hideLoader: false,
     onResponse: (http.Response response) async {
       var responseJson = jsonDecode(response.body);
 

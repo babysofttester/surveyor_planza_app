@@ -18,7 +18,7 @@ class KycController extends GetxController {
 
   //final Dio _dio = Dio();
 
-  // ---------------- PHOTO IDENTITY ----------------
+ 
   final List<String> photoIdentityList = [
     "Aadhar Card",
     "PAN Card",
@@ -28,7 +28,7 @@ class KycController extends GetxController {
 
  var selectedPhotoIdentity = RxnString();
 
-  // ---------------- ADDRESS PROOF ----------------
+  
   final List<String> addressProofList = [
     "Aadhar Card",
     "Voter ID Card",
@@ -37,7 +37,7 @@ class KycController extends GetxController {
 
  var selectedAddressProof = RxnString();
 
-  // ---------------- EDUCATION ----------------
+ 
   final List<String> educationList = [
     "Engineering",
     "Diploma"
@@ -51,6 +51,8 @@ var addressFile = Rxn<File>();
 var educationFile = Rxn<File>();
 
   var isLoading = false.obs;
+RxBool isRejected = false.obs;
+RxString rejectReason = "".obs;
 
  
 Future<void> pickFile(String type) async {

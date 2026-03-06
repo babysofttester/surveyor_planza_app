@@ -13,7 +13,7 @@ import 'app_exception.dart';
 import 'constants.dart';
 import 'utils.dart';
 
-Future<dynamic> callWebApi(TickerProvider tickerProvider, String url, Map data,
+Future<dynamic> callWebApi(TickerProvider? tickerProvider, String url, Map data,
     {required Function onResponse,
     Function? onError,
     String? token,
@@ -263,7 +263,7 @@ _returnResponse(http.Response response, Function onResponse, Function onError,
   }
 }
 
-Future<dynamic> callWebApiGet(TickerProvider tickerProvider, String url,
+Future<dynamic> callWebApiGet(TickerProvider? tickerProvider, String url,
     {required Function onResponse,
     Function? onError,
     String token = "",

@@ -15,14 +15,15 @@ class ChangePassword extends StatefulWidget {
 }
 
 class _ChangePasswordState extends State<ChangePassword>
-    with TickerProviderStateMixin {
+     {
 
   late ChangePasswordController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(ChangePasswordController(this));
+    controller = Get.put(ChangePasswordController());
+    // controller = Get.put(ChangePasswordController(this));
   }
 
   @override

@@ -17,13 +17,14 @@ class ConfirmPassword extends StatefulWidget {
 }
 
 class _ConfirmPasswordState extends State<ConfirmPassword>
-    with TickerProviderStateMixin {
+    {
   late ConfirmPasswordController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(ConfirmPasswordController(this, widget.userId));
+    controller = Get.put(ConfirmPasswordController(widget.userId));
+   // controller = Get.put(ConfirmPasswordController(this, widget.userId));
   }
  
   // @override

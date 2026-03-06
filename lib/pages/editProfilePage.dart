@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_rx/src/rx_workers/rx_workers.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,9 +21,7 @@ import 'package:surveyor_app_planzaa/pages/home.dart';
 import 'package:timezone/timezone.dart' hide Location;
 import 'package:geocoding/geocoding.dart';
 
-// import '../../../utils/app_color.dart';
-// import '../../../utils/app_fonts.dart';
-// import '../../HomePage/screen/homescreen.dart';
+
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -34,30 +33,74 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage>
     with TickerProviderStateMixin {
   late ProfileController profileController;
-  late StateCityController stateCityController;
+  late StateCityController stateCityController; 
+  
 
-  @override
-  void initState() {
-    super.initState();
 
-    profileController = Get.find<ProfileController>();
-    stateCityController = Get.put(StateCityController(this));
+@override
+void initState() {
+  super.initState();
+  try {
+    profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController(this));
+
+    stateCityController = Get.isRegistered<StateCityController>()
+        ? Get.find<StateCityController>()
+        : Get.put(StateCityController());
+
+    nameController = TextEditingController();
+    phoneController = TextEditingController();
+    emailController = TextEditingController();
 
     stateCityController.fetchStates();
-    final surveyor = profileController.surveyor;
-
-    nameController = TextEditingController(text: surveyor?.name ?? '');
-    phoneController = TextEditingController(text: surveyor?.phone ?? '');
-    emailController = TextEditingController(text: surveyor?.email ?? '');
+    _fillFields();
+    profileController.addListener(_fillFields);
+    
+  } catch (e, stack) {
+    print("INIT ERROR: $e");
+    print("STACK: $stack");
   }
+}
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.dispose();
+void _fillFields() {
+  final surveyor = profileController.surveyor;
+  if (surveyor == null) return;
+  
+  nameController.text = surveyor.name ?? '';
+  phoneController.text = surveyor.phone ?? '';
+  emailController.text = surveyor.email ?? '';
+
+  if (surveyor.state != null && surveyor.state!.isNotEmpty) {
+    stateCityController.selectedState.value = surveyor.state;
+    
+
+    stateCityController.fetchCities(surveyor.state!).then((_) {
+      if (surveyor.city != null && surveyor.city!.isNotEmpty) {
+        if (stateCityController.cities.contains(surveyor.city)) {
+          stateCityController.selectedCity.value = surveyor.city; 
+        }
+      }
+    });
   }
+}
+
+@override
+void dispose() {
+  profileController.removeListener(_fillFields); 
+  nameController.dispose();
+  phoneController.dispose();
+  emailController.dispose();
+  super.dispose();
+}
+
+  // @override
+  // void dispose() {
+  //   nameController.dispose();
+  //   phoneController.dispose();
+  //   emailController.dispose();
+  //   super.dispose();
+  // }
 
   File? profileImageFile;
   final ImagePicker _picker = ImagePicker();
@@ -119,12 +162,13 @@ class _EditProfilePageState extends State<EditProfilePage>
   late TextEditingController nameController;
   late TextEditingController phoneController;
   late TextEditingController emailController;
-    final TextEditingController latitudeController = TextEditingController();
+  final TextEditingController latitudeController = TextEditingController();
   final TextEditingController longitudeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    try{
+ return Scaffold(
       backgroundColor: Colors.white,
 
       appBar: const CustomAppBar(title: "Edit Profile"),
@@ -209,7 +253,7 @@ class _EditProfilePageState extends State<EditProfilePage>
                     controller: nameController,
                     readOnly: false,
                   ),
-                  SizedBox(height: Get.height * 0.03),
+                  SizedBox(height: Get.height * 0.02),
 
                   /// STATE
                   Row(
@@ -275,89 +319,158 @@ class _EditProfilePageState extends State<EditProfilePage>
         ],
       ),
     ),
+ 
+ 
   ],
 ), 
+     SizedBox(height: Get.height * 0.02),
                   // const SizedBox(height: 12),
 
  //lat long
-               SizedBox(
-  width: double.infinity,
-  height: 48,
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF1F3C88),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-    ),
-    onPressed: () async {
-      if (stateCityController.selectedState.value == null ||
-          stateCityController.selectedCity.value == null) {
-        Get.snackbar(
-          "Error",
-          "Please select state and district first",
-        );
-        return;
-      }
+                //lat long
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (stateCityController.selectedState.value == null ||
+                                  stateCityController.selectedCity.value == null) {
+                                Get.snackbar(
+                                  "Error",
+                                  "Please select state and district first",
+                                );
+                                return;
+                              }
 
-      String address =
-          "${stateCityController.selectedCity.value}, ${stateCityController.selectedState.value}, India";
+                              String address =
+                                  "${stateCityController.selectedCity.value}, ${stateCityController.selectedState.value}, India";
 
-      try {
-        List<Location> locations =
-            await locationFromAddress(address);
+                              List<Location> locations =
+                                  await locationFromAddress(address);
 
-        if (locations.isEmpty) {
-          Get.snackbar("Error", "Unable to find district location");
-          return;
-        }
+                              if (locations.isEmpty) {
+                                Get.snackbar( 
+                                  "Error",
+                                  "Unable to find district location",
+                                );
+                                return;
+                              }
 
-        LatLng districtLatLng = LatLng(
-          locations.first.latitude,
-          locations.first.longitude,
-        );
+                              LatLng districtLatLng = LatLng(
+                                locations.first.latitude,
+                                locations.first.longitude,
+                              );
 
-        final LatLng? result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MapPickerPage(
-              initialLocation: districtLatLng,
-            ),
-          ),
-        );
+                              final LatLng? result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MapPickerPage(
+                                    initialLocation: districtLatLng,
+                                  ),
+                                ),
+                              );
 
-        if (result != null) {
-          setState(() {
-            latitudeController.text = result.latitude.toString();
-            longitudeController.text = result.longitude.toString();
-          });
-        }
-      } catch (e) {
-        print("GEOCODING ERROR: $e");
-        Get.snackbar("Error", "Location service failed");
-      }
-    },
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.add_location_alt_sharp,
-          color: Colors.white,
-          size: 20,
-        ),
-        SizedBox(width: Get.width * 0.02),
-        Utils.textView(
-          "Select Location",
-          Get.height * 0.02,
-          CustomColors.white,
-          FontWeight.bold,
-        ),
-      ],
-    ),
-  ),
-),
+                              if (result != null) {
+                                setState(() {
+                                  latitudeController.text =
+                                      result.latitude.toString();
+                                  longitudeController.text =
+                                      result.longitude.toString();
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1F3C88),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_location_alt_sharp,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: Get.width * 0.02),
+                                Utils.textView(
+                                  "Select Location",
+                                  Get.height * 0.02,
+                                  CustomColors.white,
+                                  FontWeight.bold,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: Get.height * 0.01),
+                        Row(
+                          children: [
+                            // Icon(Icons.share_location_rounded),
+                            // const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Utils.textView(
+                                    "Latitude",
+                                    Get.width * 0.038,
+                                    CustomColors.black,
+                                    FontWeight.w500,
+                                  ),
+                                  // Text(
+                                  //   "Latitude",
+                                  //   // style: AppFonts.arcPop1()
+                                  // ),
+                                  const SizedBox(height: 2),
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: _textField(
+                                      hint: "Latitude",
+                                      controller: latitudeController, icon: Icons.location_pin,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Utils.textView(
+                                    "Longitude",
+                                    Get.width * 0.038,
+                                    CustomColors.black,
+                                    FontWeight.w500,
+                                  ),
+                                  // Text(
+                                  //   "Longitude",
+                                  //   // style: AppFonts.arcPop1()
+                                  // ),
+                                  const SizedBox(height: 2),
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: _textField(
+                                      hint: "Longitude",
+                                      controller: longitudeController, icon: Icons.location_pin,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    
+                    SizedBox(height: Get.height * 0.02),
                  
-                  SizedBox(height: Get.height * 0.03),
                   Utils.textView(
                     "Phone",
                     Get.width * 0.04,
@@ -374,7 +487,7 @@ class _EditProfilePageState extends State<EditProfilePage>
                     readOnly: true,
                   ),
 
-                  SizedBox(height: Get.height * 0.03),
+                  SizedBox(height: Get.height * 0.02),
 
                   Utils.textView(
                     "Email",
@@ -392,7 +505,7 @@ class _EditProfilePageState extends State<EditProfilePage>
                   ),
                 ],
               ),
-              SizedBox(height: Get.height * 0.04),
+              SizedBox(height: Get.height * 0.03),
               SizedBox(
                 width: double.infinity,
                 height: 40,
@@ -403,20 +516,20 @@ class _EditProfilePageState extends State<EditProfilePage>
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  onPressed: () {
-                    final profileController = Get.find<ProfileController>();
+                onPressed: () { 
+  final profileController = Get.find<ProfileController>();
+  final stateCityController = Get.find<StateCityController>(); 
 
-                    profileController.updateProfile(
-                      name: nameController.text.trim(),
-                      email: emailController.text.trim(),
-                      image: profileImageFile,
-                    );
+ 
+  profileController.selectedState.value = stateCityController.selectedState.value;
+  profileController.selectedCity.value = stateCityController.selectedCity.value;
 
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => Home()),
-                    // );
-                  },
+  profileController.updateProfile(
+    name: nameController.text.trim(),
+    email: emailController.text.trim(),
+    image: profileImageFile,
+  );
+},
                   child: Utils.textView(
                     "Save",
 
@@ -424,10 +537,7 @@ class _EditProfilePageState extends State<EditProfilePage>
                     CustomColors.white,
                     FontWeight.bold,
                   ),
-                  // Text(
-                  //   "Save",
-                  //   style: TextStyle(fontSize: 15, color: Colors.white),
-                  // ),
+                 
                 ),
               ),
             ],
@@ -435,6 +545,15 @@ class _EditProfilePageState extends State<EditProfilePage>
         ),
       ),
     );
+  
+    }catch (e, stack) {
+    print("BUILD ERROR: $e");
+    print("STACK: $stack");
+    return Scaffold(
+      body: Center(child: Text("Error: $e")),
+    );
+  }
+   
   }
 
   Widget _textField({

@@ -9,13 +9,14 @@ import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
 import 'package:surveyor_app_planzaa/core/storage/token_services.dart';
+import 'package:surveyor_app_planzaa/modal/edit_profile_response_model.dart';
 import 'package:surveyor_app_planzaa/modal/profile_response_model.dart';
 import 'package:surveyor_app_planzaa/pages/login_page.dart';
 
 
 
 class ProfileController extends GetxController {
-  final TickerProvider _tickerProvider;
+   final TickerProvider _tickerProvider;
   Rx<ProfileResponseModel> profileResponseModel = ProfileResponseModel().obs;
 
   ProfileController(this._tickerProvider);
@@ -25,25 +26,26 @@ class ProfileController extends GetxController {
 
   late SharedPreferences prefs;
   String? authToken;  
+  // ✅ Controller mein add karo (top pe)
+final TextEditingController latController = TextEditingController();
+final TextEditingController lngController = TextEditingController();
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+@override
+Future<void> onInit() async {
+  super.onInit();
+  prefs = await SharedPreferences.getInstance();
+  authToken = prefs.getString(Constants.AUTH_TOKEN);
 
-    prefs = await SharedPreferences.getInstance();
-     authToken = prefs.getString(Constants.AUTH_TOKEN);
-
-    print("PROFILE TOKEN: $authToken");
-
-// fetchProfile(); 
-if (authToken != null && authToken!.isNotEmpty) {
-  fetchProfile();
-} else {
-  Utils.showToast("Session expired. Please login again");
-  Get.offAll(() => const LoginPage());
-}
-
+  if (authToken != null && authToken!.isNotEmpty) {
+    // ✅ Widget tree build hone ke baad call karo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchProfile();
+    });
+  } else {
+    Utils.showToast("Session expired. Please login again");
+    Get.offAll(() => const LoginPage());
   }
+}
 
     final RxnString selectedState = RxnString();
   final RxnString selectedCity = RxnString();
@@ -52,8 +54,12 @@ if (authToken != null && authToken!.isNotEmpty) {
   // ✅ FETCH PROFILE
   void fetchProfile() {
     callWebApiGet(
-      _tickerProvider,
+     
+      // null,
+       _tickerProvider,
       ApiEndpoints.getProfile,
+      //   showLoader: false, 
+      // hideLoader: false,
       onResponse: (http.Response response) async {
         var responseJson = jsonDecode(response.body);
 
@@ -91,54 +97,68 @@ Future<void> updateProfile({
   required String email,
   File? image,
 }) async {
-  final userId = await TokenService.getUserId();
 
-  if (userId == null) {
-      Utils.showToast("Error: User ID missing");
-    // Get.snackbar("Error", "User ID missing");
+
+  // ✅ State & City validation
+  final state = selectedState.value;
+  final city = selectedCity.value;
+
+  if (state == null || state.isEmpty) {
+    Utils.showToast("Please select state");
     return;
-  } 
+  }
+
+  if (city == null || city.isEmpty) {
+    Utils.showToast("Please select district");
+    return;
+  }
+
   try {
     var request = http.MultipartRequest(
       "POST",
       Uri.parse(ApiEndpoints.updateProfile),
-    ); 
+    );
 
     request.headers['Authorization'] = 'Bearer $authToken';
 
-    request.fields['id'] = userId;
+    // request.fields['id'] = userId;
     request.fields['name'] = name;
     request.fields['email'] = email;
+    request.fields['state'] = state;        
+    request.fields['city'] = city;           
+    request.fields['current_lat'] = latController.text.trim();  
+    request.fields['current_lng'] = lngController.text.trim(); 
 
-    
     if (image != null) {
       request.files.add(
-        await http.MultipartFile.fromPath(
-          'image', 
-          image.path,
-        ),
+        await http.MultipartFile.fromPath('image', image.path),
       );
     }
 
-   var response = await request.send();
-   var responseData = await response.stream.bytesToString();
-   var jsonResponse = jsonDecode(responseData);
+    var response = await request.send();
+    var responseData = await response.stream.bytesToString();
+   try {
+  var jsonResponse = jsonDecode(responseData);
+  print("UPDATE PROFILE RESPONSE: $responseData");
 
+  final result = EditProfileResponseModel.fromJson(jsonResponse);
 
-if (jsonResponse["status"] == "success") {
-  Utils.showToast("Profile Updated Successfully"); 
-  fetchProfile(); 
-  Get.back();
-} else {
-  Utils.showToast(jsonResponse["message"]);
+  if (result.status == "success") {
+    Utils.showToast(result.message ?? "Profile Updated Successfully");
+    fetchProfile();
+    Get.back();
+  } else {
+    Utils.showToast(result.message ?? "Update failed");
+  }
+} catch (e) {
+  print("PARSE ERROR: $e"); 
+  Utils.showToast("Something went wrong");
 }
-
-
 
   } catch (e) {
     Utils.print(e.toString());
   }
-}  
+}
 
 }
 

@@ -25,20 +25,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
-  // final SignInController signInController = Get.put(SignInController());
-  late LoginController loginController;
+late LoginController loginController;
+
+@override
+void initState() {
+  super.initState();
+  loginController = Get.put(LoginController(this));
+}
+
   @override
-  void initState() {
-    super.initState();
-    loginController = Get.put(LoginController(this));
+  void dispose() {
+    Get.delete<LoginController>();
+    super.dispose();
   }
 
-// @override
-// void dispose() {
-//   loginController.emailController.dispose();
-//   loginController.passwordController.dispose();
-//   super.dispose();
-// }
+
+
 
   @override
   Widget build(BuildContext context) {

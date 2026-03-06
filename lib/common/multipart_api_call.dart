@@ -8,8 +8,8 @@ import 'package:surveyor_app_planzaa/common/load_manager.dart';
 
 /// Generic multipart API call function
 Future<void> callMultipartWebApi(
-  TickerProvider tickerProvider,
-  String url,
+  TickerProvider? tickerProvider,
+  String url, 
   Map<String, String> bodyFields,
   List<File> files, {
   required void Function(http.Response response) onResponse,

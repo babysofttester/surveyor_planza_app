@@ -10,9 +10,9 @@ import 'package:surveyor_app_planzaa/pages/otp_verify.dart';
 
 class ChangePasswordController extends GetxController {
 
-  final TickerProvider tickerProvider;
+  // final TickerProvider tickerProvider;
 
-  ChangePasswordController(this.tickerProvider);
+  // ChangePasswordController(this.tickerProvider);
 
   TextEditingController phoneController = TextEditingController();
 
@@ -33,12 +33,13 @@ class ChangePasswordController extends GetxController {
     };
 
     callWebApi(
-      tickerProvider,
+      null,
+      // tickerProvider,
       ApiEndpoints.forgotPassword,   
       body,
       token: authToken,              
       onResponse: (response) {
-
+ 
         final decoded = jsonDecode(response.body);
 
         ForgotPasswordResponseModel model =

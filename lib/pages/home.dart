@@ -10,6 +10,7 @@ import 'package:surveyor_app_planzaa/pages/earning.dart';
 import 'package:surveyor_app_planzaa/pages/profileScreen.dart';
 import 'package:surveyor_app_planzaa/pages/work.dart';
 import 'package:surveyor_app_planzaa/pages/workHistory.dart';
+import 'package:surveyor_app_planzaa/services/location_channel.dart';
 
 class Home extends StatefulWidget {
   
@@ -148,17 +149,30 @@ bool isOnline = true;
     ? [
         Row(
           children: [
-           Switch(
+    Switch(
   value: isOnline,
-  activeColor: CustomColors.white,          
-  activeTrackColor: CustomColors.btnColor
-      .withOpacity(0.5),                      
-  onChanged: (value) {
-    setState(() {
-      isOnline = value;
-    });
+  activeColor: CustomColors.white,
+  activeTrackColor: CustomColors.btnColor.withOpacity(0.5),
+  onChanged: (value) async {
+    if (value) {
+      // Try to go online — permission is handled inside goOnline()
+      final success = await LocationChannel.goOnline();
+      if (success) {
+        setState(() { isOnline = true; });
+        Utils.showToast("You are Online");
+      } else {
+        // Permission denied — keep switch OFF, don't loop
+        setState(() { isOnline = false; });
+        Utils.showToast("Location permission is required to go online");
+      }
+    } else { 
+      await LocationChannel.goOffline();
+      setState(() { isOnline = false; });
+      Utils.showToast("You are Offline");
+    }
   },
 ),
+
           ],
         ),
       ]

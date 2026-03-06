@@ -34,7 +34,52 @@ class _KycScreenState extends State<KycScreen>with SingleTickerProviderStateMixi
             child: Column(
               children: [
           
-               
+               Obx(() {
+  if (!kycController.isRejected.value) {
+    return const SizedBox();
+  }
+
+  return Container(
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 15),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.red.shade50,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.red.shade300),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        Utils.textView(
+          "Your KYC has been rejected",
+          Get.width * 0.04,
+          Colors.red,
+          FontWeight.bold,
+        ),
+
+        const SizedBox(height: 6),
+
+        Utils.textView(
+          "Reason: ${kycController.rejectReason.value}",
+          Get.width * 0.033,
+          Colors.black,
+          FontWeight.normal,
+        ),
+
+        const SizedBox(height: 6),
+
+        Utils.textView(
+          "Please submit a valid document and try again.",
+          Get.width * 0.032,
+          Colors.black54,
+          FontWeight.normal,
+        ),
+      ],
+    ),
+  );
+}),
                       Utils.textView(
                       "Complete Your KYC",
                       Get.width * 0.05,

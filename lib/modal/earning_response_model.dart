@@ -61,15 +61,15 @@ class Earnings {
         paidData!.add(new PaidData.fromJson(v));
       });
     }
-    totalEarnings = json['totalEarnings'];
+  totalEarnings = json['totalEarnings']?.toString(); 
     if (json['unpaidPayments'] != null) {
       unpaidPayments = <UnpaidPayments>[];
       json['unpaidPayments'].forEach((v) {
         unpaidPayments!.add(new UnpaidPayments.fromJson(v));
       });
     }
-    totaldues = json['totaldues'];
-  }
+  totaldues = json['totaldues']?.toString();
+  } 
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

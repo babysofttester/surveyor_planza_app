@@ -1,13 +1,31 @@
-
-
 import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class OfflineWorkQueueService {
-  static const _channel = MethodChannel('com.surveyor_app_planzaa/location');
+  static Database? _db;
 
-  /// Save a work submission to the native SharedPreferences queue.
-  /// [imagePaths] — list of absolute file paths on device
+  //  open / create DB 
+  static Future<Database> _getDb() async {
+    if (_db != null) return _db!;
+    final dbPath = await getDatabasesPath();
+    _db = await openDatabase(
+      join(dbPath, 'work_queue.db'),
+      version: 1,
+      onCreate: (db, _) async {
+        await db.execute('''
+          CREATE TABLE work_queue (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            payload   TEXT    NOT NULL,
+            queued_at TEXT    NOT NULL
+          )
+        ''');
+      },
+    );
+    return _db!;
+  }
+
+  //  enqueue 
   static Future<void> enqueue({
     required String projectId,
     required String bookingNo,
@@ -16,38 +34,72 @@ class OfflineWorkQueueService {
     required String description,
     required List<String> imagePaths,
   }) async {
+    final db = await _getDb();
+    final now = DateTime.now().toIso8601String();
+
     final payload = jsonEncode({
-      'project_id':   projectId,
-      'booking_no':   bookingNo,
-      'length':       length,
-      'breadth':      breadth,
-      'description':  description,
-      'image_paths':  imagePaths,              // local paths, synced later
-      'queued_at':    DateTime.now().toIso8601String(),
+      'project_id':  projectId,
+      'booking_no':  bookingNo,
+      'length':      length,
+      'breadth':     breadth,
+      'description': description,
+      'image_paths': imagePaths,
+      'queued_at':   now,
     });
 
-    await _channel.invokeMethod('enqueueWork', {'payload': payload});
+    await db.insert('work_queue', {
+      'payload':   payload,
+      'queued_at': now,
+    });
   }
 
-  /// Fetch all pending work items from SharedPreferences.
-  /// Returns them as parsed Maps.
+  //  dequeue all (reads + wipes atomically) 
   static Future<List<Map<String, dynamic>>> dequeueAll() async {
-    final List<dynamic> raw =
-        await _channel.invokeMethod('dequeueAllWork') ?? [];
+    final db = await _getDb();
 
-    return raw.map((item) {
-      return Map<String, dynamic>.from(jsonDecode(item as String));
+    return db.transaction<List<Map<String, dynamic>>>((txn) async {
+      final rows = await txn.query(
+        'work_queue',
+        columns: ['payload'],
+        orderBy: 'id ASC',
+      );
+      await txn.delete('work_queue');
+
+      return rows.map((row) {
+        return Map<String, dynamic>.from(
+          jsonDecode(row['payload'] as String) as Map,
+        );
+      }).toList();
+    });
+  }
+
+  //  peek (non-destructive) 
+  static Future<List<Map<String, dynamic>>> peekAll() async {
+    final db = await _getDb();
+    final rows = await db.query('work_queue', orderBy: 'id ASC');
+    return rows.map((row) {
+      return Map<String, dynamic>.from(
+        jsonDecode(row['payload'] as String) as Map,
+      );
     }).toList();
   }
 
-  /// How many work submissions are waiting to sync.
+  //  count 
   static Future<int> pendingCount() async {
-    final count = await _channel.invokeMethod<int>('getPendingWorkCount');
-    return count ?? 0;
+    final db = await _getDb();
+    final result = await db.rawQuery('SELECT COUNT(*) as cnt FROM work_queue');
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  /// Wipe queue (call on logout). 
+  //  clear (logout) 
   static Future<void> clearAll() async {
-    await _channel.invokeMethod('clearAllWork');
+    final db = await _getDb();
+    await db.delete('work_queue');
+  }
+
+  //  close (optional, for testing) 
+  static Future<void> closeDb() async {
+    await _db?.close();
+    _db = null;
   }
 }

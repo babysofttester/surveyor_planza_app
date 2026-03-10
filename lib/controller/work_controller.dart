@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:surveyor_app_planzaa/common/constants.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/common/web_service.dart';
+import 'package:surveyor_app_planzaa/controller/dashboard_controller.dart';
 import 'package:surveyor_app_planzaa/controller/eraning_controller.dart';
 import 'package:surveyor_app_planzaa/controller/workHistory_controller.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
@@ -123,32 +124,54 @@ class WorkController extends GetxController {
     isSavedOffline.value = false;
 
     final isOnline = await _isInternetAvailable();
+if (!isOnline) {
+  await OfflineWorkQueueService.enqueue(
+    projectId:   projectId,
+    bookingNo:   bookingNo,
+    length:      double.tryParse(lengthController.text.trim()) ?? 0.0,
+    breadth:     double.tryParse(breadthController.text.trim()) ?? 0.0,
+    description: descriptionController.text.trim(),
+    imagePaths:  selectedImages.map((f) => f.path).toList(),
+  );
 
-    if (!isOnline) {
-      //  OFFLINE: save to SQLite 
-      await OfflineWorkQueueService.enqueue(
-        projectId:   projectId,
-        bookingNo:   bookingNo,
-        length:      double.tryParse(lengthController.text.trim()) ?? 0.0,
-        breadth:     double.tryParse(breadthController.text.trim()) ?? 0.0,
-        description: descriptionController.text.trim(),
-        imagePaths:  selectedImages.map((f) => f.path).toList(),
-      );
+  isSavedOffline.value = true;
+  isLoading.value = false;
+  update();
+  await _refreshPendingCount();
 
-      isSavedOffline.value = true;
-      isLoading.value = false;
-      await _refreshPendingCount();
+  // ✅ Go back to dashboard and mark this booking as pending sync
+  if (Get.isRegistered<DashboardController>()) {
+    Get.find<DashboardController>().markAsPendingSync(bookingNo);
+  }
 
-      Get.snackbar(
-        "Saved Offline",
-        "No internet. Work saved locally and will sync automatically.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-      return;
-    }
+  Get.back(); // back to dashboard
+  return;
+}
+    // if (!isOnline) {
+    //   //  OFFLINE: save to SQLite 
+    //   await OfflineWorkQueueService.enqueue(
+    //     projectId:   projectId,
+    //     bookingNo:   bookingNo,
+    //     length:      double.tryParse(lengthController.text.trim()) ?? 0.0,
+    //     breadth:     double.tryParse(breadthController.text.trim()) ?? 0.0,
+    //     description: descriptionController.text.trim(),
+    //     imagePaths:  selectedImages.map((f) => f.path).toList(),
+    //   );
+
+    //   isSavedOffline.value = true;
+    //   isLoading.value = false;
+    //   await _refreshPendingCount();
+
+    //   Get.snackbar(
+    //     "Saved Offline",
+    //     "No internet. Work saved locally and will sync automatically.",
+    //     snackPosition: SnackPosition.BOTTOM,
+    //     backgroundColor: Colors.orange,
+    //     colorText: Colors.white,
+    //     duration: const Duration(seconds: 3),
+    //   );
+    //   return;
+    // }
 
     //  ONLINE: submit to server 
     await _submitToServer(token);
@@ -187,28 +210,38 @@ class WorkController extends GetxController {
           Utils.print("Work Upload Response: ${response.body}");
 
           if (responseJson['status'] == "success") {
-            Utils.showToast("${responseJson['message']}");
+  Utils.showToast("${responseJson['message']}");
 
-            await Future.delayed(const Duration(milliseconds: 500));
 
-            // Refresh related controllers
-            if (Get.isRegistered<WorkHistoryController>()) {
-              Get.find<WorkHistoryController>().fetchWorkHistory();
-            }
-            if (Get.isRegistered<EarningController>()) {
-              Get.find<EarningController>().fetchEarnings();
-            }
+  await Future.delayed(const Duration(milliseconds: 500));
+    
 
-            // Clear form
-            _clearForm();
+  if (Get.isRegistered<WorkHistoryController>()) {
+    Get.find<WorkHistoryController>().fetchWorkHistory();
+  }
+  if (Get.isRegistered<EarningController>()) {
+    Get.find<EarningController>().fetchEarnings();
+  }
 
-            // Flush any offline items that were saved before
-            await _flushOfflineWorkQueue(token);
+   _clearForm();
+  isLoading.value = false;
+  update();
+  
+  await _flushOfflineWorkQueue(token);
 
-            Get.back();
-            onTabChange?.call(2);
-
-          } else {
+  // ✅ Pop back to Home first, THEN call tab change
+  Get.back(); 
+  await Future.delayed(const Duration(milliseconds: 200));
+  onTabChange?.call(1);
+  return;
+ 
+//   _clearForm();
+// await _flushOfflineWorkQueue(token);
+// Get.back();
+// // Small delay to let Get.back() complete before tab switch
+// await Future.delayed(const Duration(milliseconds: 100));
+// onTabChange?.call(1); 
+} else {
             // Server responded but returned failure — save offline as fallback
             Utils.showToast("${responseJson['message']}");
 
@@ -292,23 +325,30 @@ class WorkController extends GetxController {
     await _refreshPendingCount();
 
     if (failed.isEmpty && pending.isNotEmpty) {
-      // Refresh history after successful sync
-      if (Get.isRegistered<WorkHistoryController>()) {
-        Get.find<WorkHistoryController>().fetchWorkHistory();
-      }
-      if (Get.isRegistered<EarningController>()) {
-        Get.find<EarningController>().fetchEarnings();
-      }
+  if (Get.isRegistered<WorkHistoryController>()) {
+    Get.find<WorkHistoryController>().fetchWorkHistory();
+  }
+  if (Get.isRegistered<EarningController>()) {
+    Get.find<EarningController>().fetchEarnings();
+  }
+  if (Get.isRegistered<DashboardController>()) {
+    Get.find<DashboardController>().clearPendingSync();
+    Get.find<DashboardController>().fetchDashboard();
+  }
 
-      Get.snackbar(
-        "Synced",
-        "${pending.length} offline submission(s) uploaded successfully.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-    } else if (failed.isNotEmpty) {
+  Get.snackbar(
+    "Synced",
+    "${pending.length} offline submission(s) uploaded successfully.",
+    snackPosition: SnackPosition.BOTTOM,
+    backgroundColor: Colors.green,
+    colorText: Colors.white,
+    duration: const Duration(seconds: 3),
+  );
+
+  // ✅ Redirect to Work History after sync
+  await Future.delayed(const Duration(milliseconds: 500));
+  onTabChange?.call(1);
+} else if (failed.isNotEmpty) {
       Get.snackbar(
         "Partial Sync",
         "${pending.length - failed.length} synced, ${failed.length} still pending.",
@@ -384,7 +424,7 @@ class WorkController extends GetxController {
 
   void _clearForm() {
     selectedImages.clear();
-    lengthController.clear();
+    lengthController.clear(); 
     breadthController.clear();
     descriptionController.clear();
     isSavedOffline.value = false;
@@ -402,3 +442,5 @@ class WorkController extends GetxController {
     }
   } 
 }
+
+

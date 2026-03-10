@@ -21,29 +21,35 @@ class LoginController extends GetxController {
 
   LoginController(this._tickerProvider);
   
-
-  final emailController = TextEditingController();
+  // ✅ late, initialized in onInit
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+ // final emailController = TextEditingController();
   // final isLoading = false.obs;
 Rx<LoginResponseModel> loginResponseModel = LoginResponseModel().obs;
   String? authToken;
   late SharedPreferences prefs;
 
   RxBool rememberMe = false.obs;
-final passwordController = TextEditingController();
+//final passwordController = TextEditingController();
 RxBool isPasswordVisible = false.obs;
 
 
   @override
   Future<void> onInit() async {
     super.onInit();
-    prefs = await SharedPreferences.getInstance();
+     // ✅ Initialize here
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
 
-  rememberMe.value = prefs.getBool("remember_me") ?? false;
+    prefs = await SharedPreferences.getInstance();
+    rememberMe.value = prefs.getBool("remember_me") ?? false;
 
   if (rememberMe.value) {
     emailController.text = prefs.getString("saved_email") ?? "";
   }
   }
+
 
   Future<void> handleRememberMe() async {
   if (rememberMe.value) {
@@ -54,6 +60,12 @@ RxBool isPasswordVisible = false.obs;
     await prefs.remove("saved_email");
   }
 }
+
+
+bool _isDisposed = false;
+
+
+
 
 Future<void> login() async {
   final email = emailController.text.trim();
@@ -68,6 +80,7 @@ Future<void> login() async {
     Utils.showToast("Error: Please enter password");
     return;
   }
+ if (_isDisposed) return;
 
   Map<String, String> data = {
     "email": email,
@@ -156,11 +169,11 @@ print("isPending: $isPending");
 );
 }
 
-
-@override
-void onClose() {
-  emailController.dispose();
-  passwordController.dispose();
-  super.onClose();
-}
+// @override
+// void onClose() {
+//   _isDisposed = true;
+//   emailController.dispose();
+//   passwordController.dispose();
+//   super.onClose();
+// }
 }

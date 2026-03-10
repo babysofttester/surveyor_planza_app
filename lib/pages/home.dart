@@ -126,9 +126,9 @@ bool isOnline = true;
                   ? Get.width * 0.15
                   : Get.width * 0.075,
               elevation: 0,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.white,
-              surfaceTintColor: Colors.white,
+              backgroundColor: CustomColors.boxColor,
+              foregroundColor: CustomColors.boxColor,
+              surfaceTintColor: CustomColors.boxColor,
               // leading:
  
               //     Padding(
@@ -141,7 +141,7 @@ bool isOnline = true;
                 MediaQuery.of(context).size.width < 600
                     ? Get.width * 0.05
                     : Get.width * 0.03,
-                CustomColors.black,
+                CustomColors.white,
                 FontWeight.bold,
               ),
               centerTitle: true,
@@ -149,7 +149,7 @@ bool isOnline = true;
     ? [
         Row(
           children: [
-    Switch(
+       Switch(
   value: isOnline,
   activeColor: CustomColors.white,
   activeTrackColor: CustomColors.btnColor.withOpacity(0.5),
@@ -167,7 +167,7 @@ bool isOnline = true;
       }
     } else { 
       await LocationChannel.goOffline();
-      setState(() { isOnline = false; });
+      setState(() { isOnline = false; }); 
       Utils.showToast("You are Offline");
     }
   },
@@ -184,208 +184,173 @@ bool isOnline = true;
         top: false,
         child: Container(
           height: 75,
-          decoration: const BoxDecoration(
-            color: CustomColors.white,
-           
-          ),
+         decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: const BorderRadius.only(
+    topLeft: Radius.circular(20),
+    topRight: Radius.circular(20),
+  ),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.5),
+      blurRadius: 12,
+      offset: const Offset(0, -3),
+    ),
+  ],
+),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() { 
-                        pageIndex = 0;
-                        appTitle = "Dashboard"; 
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          pageIndex == 0 ? Icons.home : Icons.home_outlined,
-                          color: pageIndex == 0
-                              ? const Color(0xFF1E3A8A)
-                              : Colors.grey,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              "Home",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: pageIndex == 0
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: pageIndex == 0
-                                    ? const Color(0xFF1E3A8A)
-                                    : Colors.grey,
-                              ),
-                            ),
-                            
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                 GestureDetector(
+  onTap: () {
+    setState(() { 
+      pageIndex = 0;
+      appTitle = "Dashboard"; 
+    });
+  },
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutBack,
+        transform: Matrix4.translationValues(0, pageIndex == 0 ? -4 : 0, 0),
+        child: Icon(
+          pageIndex == 0 ? Icons.home : Icons.home_outlined,
+          size: pageIndex == 0 ? 30 : 22,
+          color: pageIndex == 0 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+      //const SizedBox(height: 2),
+      Text(
+        "Home",
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: pageIndex == 0 ? FontWeight.bold : FontWeight.normal,
+          color: pageIndex == 0 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+  
+    ],
+  ),
+),
                 ],
               ),
-              // GestureDetector(
-              //   onTap: () {
-              //     setState(() {
-              //       pageIndex = 1;
-              //       appTitle = "Work";
-              //     });
-              //   },
-              //   child: Column(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     children: [
-              //       Icon(
-              //         pageIndex == 1 ? Icons.settings : Icons.settings_outlined,
-              //         color: pageIndex == 1
-              //             ? const Color(0xFF1E3A8A)
-              //             : Colors.grey,
-              //       ),
-              //       const SizedBox(height: 4),
-              //       Text(
-              //         "Work",
-              //         style: TextStyle(
-              //           fontSize: 12,
-              //           fontWeight: pageIndex == 1
-              //               ? FontWeight.bold
-              //               : FontWeight.normal,
-              //           color: pageIndex == 1
-              //               ? const Color(0xFF1E3A8A)
-              //               : Colors.grey,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
+            
+            
               GestureDetector(
-                onTap: () {
-                  setState(() {
-                    pageIndex = 1;
-                    appTitle = "Work History";
-                  });
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      pageIndex == 2
-                          ? Icons.file_copy
-                          : Icons.file_copy_outlined,
-                      color: pageIndex == 1
-                          ? const Color(0xFF1E3A8A)
-                          : Colors.grey,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Work History",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: pageIndex == 1
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: pageIndex == 1
-                            ? const Color(0xFF1E3A8A)
-                            : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    pageIndex = 2;
-                    appTitle = "Earning";
-                  });
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      pageIndex == 2
-                          ? Icons.receipt_long
-                          : Icons.receipt_long_outlined,
-                      color: pageIndex == 2
-                          ? const Color(0xFF1E3A8A)
-                          : Colors.grey,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Earning",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: pageIndex == 2      
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: pageIndex == 2
-                            ? const Color(0xFF1E3A8A)
-                            : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    pageIndex = 3;
-                    appTitle = "Profile";
-                  });
-                   // print("Profile tapped");
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      pageIndex == 3 ? Icons.person : Icons.person_outline,
-                      color: pageIndex == 3
-                          ? const Color(0xFF1E3A8A)
-                          : Colors.grey,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Profile",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: pageIndex == 3
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: pageIndex == 3
-                            ? const Color(0xFF1E3A8A)
-                            : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+  onTap: () {
+    setState(() { pageIndex = 1; appTitle = "Work History"; });
+  },
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutBack,
+        transform: Matrix4.translationValues(0, pageIndex == 1 ? -4 : 0, 0),
+        child: Icon(
+          pageIndex == 1 ? Icons.file_copy : Icons.file_copy_outlined,
+          size: pageIndex == 1 ? 30 : 22,
+          color: pageIndex == 1 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+    //  const SizedBox(height: 4),
+      Text(
+        "Work History",
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: pageIndex == 1 ? FontWeight.bold : FontWeight.normal,
+          color: pageIndex == 1 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+      
+    ],
+  ),
+),
+             GestureDetector(
+  onTap: () {
+    setState(() { pageIndex = 2; appTitle = "Earning"; });
+  },
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutBack,
+        transform: Matrix4.translationValues(0, pageIndex == 2 ? -4 : 0, 0),
+        child: Icon(
+          pageIndex == 2 ? Icons.receipt_long : Icons.receipt_long_outlined,
+          size: pageIndex == 2 ? 30 : 22,
+          color: pageIndex == 2 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+     // const SizedBox(height: 4),
+      Text(
+        "Earning",
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: pageIndex == 2 ? FontWeight.bold : FontWeight.normal,
+          color: pageIndex == 2 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+     
+    ],
+  ),
+),
+             GestureDetector(
+  onTap: () {
+    setState(() { pageIndex = 3; appTitle = "Profile"; });
+  },
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutBack,
+        transform: Matrix4.translationValues(0, pageIndex == 3 ? -4 : 0, 0),
+        child: Icon(
+          pageIndex == 3 ? Icons.person : Icons.person_outline,
+          size: pageIndex == 3 ? 30 : 22,
+          color: pageIndex == 3 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+     // const SizedBox(height: 4),
+      Text(
+        "Profile",
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: pageIndex == 3 ? FontWeight.bold : FontWeight.normal,
+          color: pageIndex == 3 ? const Color(0xFF1E3A8A) : Colors.grey,
+        ),
+      ),
+         ],
+  ),
+), 
             ],
           ),
         ),
       ),
+    
     );
     // );
   }
   Widget _buildPage(int index) {
   switch (index) {
-    case 0:
-      return Dashboard(
-        onTabChange: (tabIndex) {
-          setState(() {
-            pageIndex = tabIndex;
-            if (tabIndex == 0) appTitle = "Dashboard";
-            if (tabIndex == 1) appTitle = "Work History";
-            if (tabIndex == 2) appTitle = "Earning";
-            if (tabIndex == 3) appTitle = "Profile";
-          });
-        },
-      );
+case 0:
+  return Dashboard(
+    onTabChange: (tabIndex) {
+      setState(() {
+        pageIndex = tabIndex;
+        if (tabIndex == 0) appTitle = "Dashboard";
+        if (tabIndex == 1) appTitle = "Work History";
+        if (tabIndex == 2) appTitle = "Earning";
+        if (tabIndex == 3) appTitle = "Profile";
+      });
+    },   
+  );
     // case 1: return const Work();
     case 1: return const WorkHistory();
     case 2: return const Earning();

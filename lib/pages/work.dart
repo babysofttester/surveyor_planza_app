@@ -11,11 +11,12 @@ class Work extends StatefulWidget {
   final String? projectId;
   final String? bookingNo;
   final String? acceptedAt;
+    final Function(int)? onTabChange;
 
 
-  const Work({super.key,  this.projectId,  this.bookingNo, this.acceptedAt}); 
+  const Work({super.key,  this.projectId,  this.bookingNo, this.acceptedAt, this.onTabChange}); 
 
-  @override
+  @override 
   State<Work> createState() => _WorkState();
 }
 
@@ -23,13 +24,23 @@ class _WorkState extends State<Work> with SingleTickerProviderStateMixin {
  late WorkController workController;
  late DashboardController dashboardController;
 
- @override
+@override
 void initState() {
   super.initState();
 
+  dashboardController = Get.find<DashboardController>();
 
- dashboardController = Get.put(DashboardController(this)); 
-  workController = Get.put(WorkController(this));
+  // Delete existing instance if any to avoid stale controller
+  if (Get.isRegistered<WorkController>()) {
+    Get.delete<WorkController>();
+  }
+
+  workController = Get.put(
+    WorkController(
+      this,
+      onTabChange: widget.onTabChange, 
+    ),
+  );
 
   if (widget.projectId != null) {
     workController.projectId = widget.projectId!;
@@ -38,9 +49,8 @@ void initState() {
   if (widget.bookingNo != null) {
     workController.bookingNo = widget.bookingNo!;
   }
-
 }
-
+  
   @override
   Widget build(BuildContext context) {
   
@@ -63,12 +73,12 @@ void initState() {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
-                          BoxShadow(
-            color: Colors.black.withOpacity(0.09),
+           BoxShadow(
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 8,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 3),
           ),
-                      ],
+        ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,31 +279,36 @@ void initState() {
                         const SizedBox(height: 24),
 
                         // Complete Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: Obx(() => ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E3A8A),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: controller.isLoading.value
-                                    ? null
-                                    : controller.submitWork,
-                                child: controller.isLoading.value
-                                    ? const CircularProgressIndicator(
-                                        color: Colors.white)
-                                    : Utils.textView(
-                                        "Complete",
-                                        Get.width * 0.045,
-                                        Colors.white,
-                                        FontWeight.w700,
-                                      ),
-                              )),
-                        ),
+                       // Complete Button
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF1E3A8A),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    onPressed: controller.isLoading.value ? null : controller.submitWork,
+    child: controller.isLoading.value
+        ? const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+            
+          ) 
+        : Utils.textView(
+            "Complete",
+            Get.width * 0.045,
+            Colors.white,
+            FontWeight.w700,
+          ),
+  ),
+),
                       ],
                     ),
                   ),

@@ -20,18 +20,18 @@ class _ConfirmPasswordState extends State<ConfirmPassword>
     {
   late ConfirmPasswordController controller;
 
-  @override
-  void initState() {
-    super.initState();
+@override
+void initState() {
+  super.initState();
     controller = Get.put(ConfirmPasswordController(widget.userId));
-   // controller = Get.put(ConfirmPasswordController(this, widget.userId));
-  }
+}
  
-  // @override
-  // void dispose() {
-  //   Get.delete<ConfirmPasswordController>();
-  //   super.dispose();
-  // }
+ 
+  @override
+  void dispose() {
+    Get.delete<ConfirmPasswordController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

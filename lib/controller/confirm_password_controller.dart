@@ -6,22 +6,32 @@ import 'package:surveyor_app_planzaa/common/multipart_api_call.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/controller/login_controller.dart';
 import 'package:surveyor_app_planzaa/core/api/api_endpoint.dart';
+import 'package:surveyor_app_planzaa/pages/home.dart';
 import 'package:surveyor_app_planzaa/pages/login_page.dart';
 
 class ConfirmPasswordController extends GetxController {
   // final TickerProvider tickerProvider;
   final String userId;
-  ConfirmPasswordController(this.userId);
+  ConfirmPasswordController(this.userId); 
 
   // ConfirmPasswordController(this.tickerProvider, this.userId);
 
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+ // ✅ Use late + initialize in onInit, NOT as field declarations
+  late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
 
   RxBool isPasswordVisible = false.obs;
   RxBool isConfirmPasswordVisible = false.obs;
 
-  void changePassword() {
+    @override
+  void onInit() {
+    super.onInit();
+ 
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+  }
+
+void changePassword() {
     if (passwordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty) {
       Utils.showToast("Please fill all fields");
@@ -33,26 +43,33 @@ class ConfirmPasswordController extends GetxController {
       return;
     }
 
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
     Map<String, String> data = {
       "id": userId,
-      "password": passwordController.text.trim(),
-      "password_confirmation": confirmPasswordController.text.trim(),
+      "password": password,
+      "password_confirmation": confirmPassword,
     };
 
     callMultipartWebApi(
       null,
-      // tickerProvider,
       ApiEndpoints.changePassword,
       data,
       [],
       onResponse: (response) {
         final responseJson = jsonDecode(response.body);
 
-        if (response.statusCode == 200 && responseJson["status"] == "success") {
+       if (response.statusCode == 200 && responseJson["status"] == "success") {
           Utils.showToast(responseJson["message"] ?? "Password Updated");
-
-        
-Get.offAll(() => const LoginPage());
+           // ✅ Use WidgetsBinding to navigate AFTER current frame completes
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Get.offAll(() => const LoginPage());
+     Get.offAll(() => Home()); 
+ 
+  });
+          // ✅ Navigate immediately, no delay
+          // Get.offAll(() => const LoginPage());
         } else {
           Utils.showToast(
             responseJson["message"] ?? "Failed to update password",
@@ -70,3 +87,4 @@ Get.offAll(() => const LoginPage());
     super.onClose();
   }
 }
+

@@ -15,8 +15,6 @@ import 'package:surveyor_app_planzaa/controller/login_controller.dart';
 import 'package:surveyor_app_planzaa/pages/changePassword.dart';
 import 'package:surveyor_app_planzaa/pages/sign_up_page.dart';
 
-
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -25,22 +23,26 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
-late LoginController loginController;
+  late LoginController loginController;
 
-@override
-void initState() {
-  super.initState();
-  loginController = Get.put(LoginController(this));
-}
+  @override
+  void initState() {
+    super.initState();
+    loginController = Get.put(LoginController(this));
+  }
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   Get.delete<LoginController>(force: true);
+  //   loginController = Get.put(LoginController(this));
+  // }
 
   @override
   void dispose() {
-    Get.delete<LoginController>();
     super.dispose();
+    Get.delete<LoginController>();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ void initState() {
           children: [
             Positioned(
               top: 0,
-              left: 0, 
+              left: 0,
               right: 0,
               bottom: MediaQuery.of(context).size.height * 0.42,
               child: Image.asset(
@@ -66,18 +68,18 @@ void initState() {
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                 width: double.infinity,
+                width: double.infinity,
                 // height: screenHeight * 0.46,
                 padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                child: SingleChildScrollView(   
+                child: SingleChildScrollView(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min, 
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [ 
+                    children: [
                       ClipRect(
                         child: Align(
                           alignment: Alignment.center,
@@ -97,7 +99,7 @@ void initState() {
                         CustomColors.black,
                         FontWeight.bold,
                       ),
-                  
+
                       SizedBox(height: Get.height * 0.01),
                       Utils.textView(
                         "Welcome back! Enter your details to continue.",
@@ -105,130 +107,137 @@ void initState() {
                         CustomColors.textGrey,
                         FontWeight.normal,
                       ),
-                  
+
                       SizedBox(height: Get.height * 0.03),
-                  
-                      CommonTextField(  
-                        () {}, 
+
+                      CommonTextField(
+                        () {},
                         svg: Assets.emailSVG,
                         controller: loginController.emailController,
                         inputTypeKeyboard: TextInputType.emailAddress,
                         obscureText: false,
                         keyboardActionType: TextInputAction.done,
-                      //  inputTypeKeyboard: TextInputType.emailAddress,
-                        lineFormatter:FilteringTextInputFormatter.singleLineFormatter,
+                        //  inputTypeKeyboard: TextInputType.emailAddress,
+                        lineFormatter:
+                            FilteringTextInputFormatter.singleLineFormatter,
                         hintText: "Enter Registered Email",
                         maxLength: 999,
                         obscure: false,
-                        onChanged: () {},    
+                        onChanged: () {},
                       ),
-                       SizedBox(height: Get.height * 0.03),
-                  
+                      SizedBox(height: Get.height * 0.03),
+
                       Obx(
-  () => CommonTextField(
-    () {},
-    svg: Assets.passwordSVG,
-    controller: loginController.passwordController,
-    keyboardActionType: TextInputAction.done,
-    inputTypeKeyboard: TextInputType.visiblePassword,
-    lineFormatter:
-        FilteringTextInputFormatter.singleLineFormatter,
-    hintText: "Password",
-    maxLength: 999,
-    obscureText: !loginController.isPasswordVisible.value,
-    obscure: true,
-    onChanged: () {},
+                        () => CommonTextField(
+                          () {},
+                          svg: Assets.passwordSVG,
+                          controller: loginController.passwordController,
+                          keyboardActionType: TextInputAction.done,
+                          inputTypeKeyboard: TextInputType.visiblePassword,
+                          lineFormatter:
+                              FilteringTextInputFormatter.singleLineFormatter,
+                          hintText: "Password",
+                          maxLength: 999,
+                          obscureText: !loginController.isPasswordVisible.value,
+                          obscure: true,
+                          onChanged: () {},
 
-    suffixIcon: IconButton(
-      icon: Icon(
-        loginController.isPasswordVisible.value
-            ? Icons.visibility
-            : Icons.visibility_off,
-        color: CustomColors.outlineGrey,
-      ),
-      onPressed: () {
-       loginController.isPasswordVisible.value =
-    !loginController.isPasswordVisible.value; 
-      },
-    ),
-  ),
-),
-                  
-                    // /  SizedBox(height: Get.height * 0.01),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              loginController.isPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: CustomColors.outlineGrey,
+                            ),
+                            onPressed: () {
+                              loginController.isPasswordVisible.value =
+                                  !loginController.isPasswordVisible.value;
+                            },
+                          ),
+                        ),
+                      ),
 
-                      Obx(() => Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    Row(
-      children: [
-        Checkbox(
-          value: loginController.rememberMe.value,
-          activeColor: CustomColors.boxColor,
-          onChanged: (value) {
-            loginController.rememberMe.value = value ?? false;
-            loginController.handleRememberMe();
-          },
-        ),
-        GestureDetector(
-          onTap: () {
-            loginController.rememberMe.value =
-                !loginController.rememberMe.value;
-            loginController.handleRememberMe();
-          },
-          child: Utils.textView(
-            "Remember me",
-            Get.height * 0.018,
-            CustomColors.black,
-            FontWeight.normal,
-          ),
-        ),
-      ],
-    ),
+                      // /  SizedBox(height: Get.height * 0.01),
+                      Obx(
+                        () => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: loginController.rememberMe.value,
+                                  activeColor: CustomColors.boxColor,
+                                  onChanged: (value) {
+                                    loginController.rememberMe.value =
+                                        value ?? false;
+                                    loginController.handleRememberMe();
+                                  },
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    loginController.rememberMe.value =
+                                        !loginController.rememberMe.value;
+                                    loginController.handleRememberMe();
+                                  },
+                                  child: Utils.textView(
+                                    "Remember me",
+                                    Get.height * 0.018,
+                                    CustomColors.black,
+                                    FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
 
-    TextButton(
-      onPressed: () {
-          Navigator.push(
+                            TextButton(
+                              onPressed: () {
+                                Get.to(
+                                  () => ChangePassword(
+                                    phone: loginController.emailController.text,
+                                  ),
+                                );
+                                /*    Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChangePassword(phone: loginController.emailController.text,),
             ),
-          );
-      },
-      child: Utils.textView( 
-        "Forgot Password?",
-        Get.height * 0.018,
-        CustomColors.boxColor,
-        FontWeight.normal,
-      ),
-    ),
-  ],
-)),
-                  SizedBox(height: Get.height * 0.03),
+          ); */
+                              },
+                              child: Utils.textView(
+                                "Forgot Password?",
+                                Get.height * 0.018,
+                                CustomColors.boxColor,
+                                FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: Get.height * 0.03),
                       SizedBox(
                         width: double.infinity,
                         height: Get.height * 0.06,
-                        child:  ElevatedButton(
+                        child: ElevatedButton(
                           onPressed: () {
                             loginController.login();
                           },
-                           // onPressed:signInController.sendOtp,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CustomColors.boxColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                          // onPressed:signInController.sendOtp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColors.boxColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child:  Utils.textView(
-                                    "Log In",
-                  
-                                    Get.height * 0.02,
-                                    CustomColors.white,
-                                    FontWeight.bold,
-                                  ),
+                          ),
+                          child: Utils.textView(
+                            "Log In",
+
+                            Get.height * 0.02,
+                            CustomColors.white,
+                            FontWeight.bold,
                           ),
                         ),
-                      
-                  
+                      ),
+
                       SizedBox(height: Get.height * 0.01),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -256,7 +265,7 @@ void initState() {
                               FontWeight.normal,
                             ),
                           ),
-                        ], 
+                        ],
                       ),
                     ],
                   ),
@@ -267,8 +276,5 @@ void initState() {
         ),
       ),
     );
-  
-  
-  
   }
 }

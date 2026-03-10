@@ -43,6 +43,13 @@ SizedBox(height: Get.height * 0.02),
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+           BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
                   ),
                   child: TabBar(
                     indicator: BoxDecoration(
@@ -180,11 +187,11 @@ class _EarningsTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+           color:   CustomColors.btnColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 8),
           ),

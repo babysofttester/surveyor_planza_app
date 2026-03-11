@@ -39,36 +39,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   late SharedPreferences prefs;
 
-  // int pageIndex = 0;
+
   int? pageIndex;
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _animationController = AnimationController(vsync: this);
-  //   load();
 
-  //     pageIndex = 0;
-
-  // final pages = [
-  //   HomeScreen(
-  //     onTabChange: (index) {
-  //       setState(() {
-  //         pageIndex = index;
-
-  //         if (index == 0) appTitle = "Home";
-  //         if (index == 1) appTitle = "Services";
-  //         if (index == 2) appTitle = "Projects";
-  //         if (index == 3) appTitle = "Order History";
-  //         if (index == 4) appTitle = "Profile";
-  //       });
-  //     },
-  //   ),
-  //   const ServiceScreen(),
-  //   ProjectPage(),
-  //   const OrderHistory(),
-  //   const ProfileScreen(),
-  // ];
-  // }
 
   late List<Widget> pages;
   late StatusUpdateController statusUpdateController;
@@ -80,15 +53,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     pageIndex = 0;
 appTitle = "Dashboard";
-    // pages = [
-    //  const Dashboard(),
-    //  const Work(),
-    //  const WorkHistory(),
-    //  const Earning(),
-    //  const ProfileScreen(),
- 
-    // ];
-// pages = [];
+
     load();
   } 
 
@@ -105,19 +70,7 @@ appTitle = "Dashboard";
     super.dispose();
   }
 
-  // final pages = [
-  //   const HomeScreen(),
-  //   const ServiceScreen(),
-  //   ProjectPage(),
-  //   const OrderHistory(),
-  //   const ProfileScreen(),
-
-  //   // const Goals(),
-  //   // const Obstacles(),
-  //   // const Actionss(),
-  //   // const Level(),
-  //   // const ShareScreen(),
-  // ];
+ 
 bool isOnline = true;
   String appTitle = "Dashboard";
   @override
@@ -158,9 +111,8 @@ bool isOnline = true;
   activeTrackColor: CustomColors.btnColor.withOpacity(0.5),
   onChanged: (value) async {
     if (value) { 
-      
-      final success = await LocationChannel.goOnline();
-      if (success) {
+    
+     
         final apiSuccess = await statusUpdateController.updateOnlineStatus(1);
         if (apiSuccess) {
           setState(() { isOnline = true; });
@@ -168,9 +120,15 @@ bool isOnline = true;
         } else {
           Utils.showToast("Failed to update status. Try again.");
         }
-      } 
+      
     } else {
-   
+    final apiSuccess = await statusUpdateController.updateOnlineStatus(0);
+        if (apiSuccess) {
+          setState(() { isOnline = false; });
+          Utils.showToast("You are Offline");
+        } else {
+          Utils.showToast("Failed to update status. Try again.");
+        }
     
     }
   },

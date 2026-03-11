@@ -1,6 +1,6 @@
 class ApiEndpoints {
   static const baseUrl =
-      "https://planzaa.babysofts.in/surveyor-api";
+      "http://192.168.1.188/planzaa-live/surveyor-api";
 
   static const login = "$baseUrl/login";
   static const verifyOtp = "$baseUrl/verify-otp";
@@ -22,4 +22,5 @@ class ApiEndpoints {
   static const changePassword = "$baseUrl/change-password";
   static const forgotVerifyOtp = "$baseUrl/forgot-verify-otp";
     static const forgotPassword = "$baseUrl/forgot-password";
+    
 }

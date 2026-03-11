@@ -26,12 +26,13 @@ late DashboardController dashboardController;
  @override
 void initState() {
   super.initState();
-  // ✅ Reuse existing controller if already registered, else create new
-  if (Get.isRegistered<DashboardController>()) {
-    dashboardController = Get.find<DashboardController>();
-  } else {
+  //dashboardController = Get.put(DashboardController(this));
+   if (Get.isRegistered<DashboardController>()){
+dashboardController = Get.find<DashboardController>();
+   }else {
     dashboardController = Get.put(DashboardController(this));
-  }
+   }
+ 
 }
 
   @override
@@ -79,12 +80,18 @@ void initState() {
 
   Widget _jobCard(JobRequest job, DashboardController controller) {
     return GestureDetector(
-      onTap: () =>  Get.to(() => Work(
-  projectId: job.projectId!.toString(),
-  bookingNo: job.bookingNo!,
-  acceptedAt: job.acceptedAt,   
-    onTabChange: widget.onTabChange,
-)),
+      onTap: () {
+        if (job.status == 'accepted' ){
+         Get.to(() => Work(
+            projectId: job.projectId!.toString(),
+          bookingNo: job.bookingNo!,
+          acceptedAt: job.acceptedAt,
+          onTabChange: widget.onTabChange,
+         ));
+        }else {
+    Utils.showToast("Accept the job first to start work");
+  }
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
@@ -116,7 +123,7 @@ void initState() {
         
      if (job.status == "accepted")
   Obx(() {
-    // ✅ Hide timer if pending sync
+  
     final isPendingSync = dashboardController.pendingSyncBookings
         .contains(job.bookingNo ?? "");
     if (isPendingSync) return const SizedBox();
@@ -261,19 +268,7 @@ Widget _buildActionButtons(JobRequest job) {
 
   } 
 
-  if (status == "completed") {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        onPressed: null,
-        child: Utils.textView("Completed", Get.width * 0.035, CustomColors.white, FontWeight.w700),
-      ),
-    );
-  }
+
 
 if (status == "accepted") {
   final remainingRx = dashboardController.remainingTimeMap[job.projectId ?? 0];
@@ -357,6 +352,8 @@ if (status == "accepted") {
     final isExpired = remainingRx.value.inSeconds <= 0;
     if (isExpired) return const SizedBox();
 
+   // return SizedBox();
+
     return Align(
       alignment: Alignment.centerRight,
       child: ElevatedButton(
@@ -373,36 +370,12 @@ if (status == "accepted") {
         child: Utils.textView("Inprogress", Get.width * 0.035, CustomColors.white, FontWeight.w700),
       ),
     );
+ 
+ 
   });
 }
   
-  return Row(
-    children: [
-      Expanded(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2F3E8C),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          onPressed: () => dashboardController.updateJobStatus(
-              job.projectId ?? 0, job.bookingNo ?? "", "accepted"),
-          child: Utils.textView("Accept", Get.width * 0.035, CustomColors.white, FontWeight.w700),
-        ),
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: CustomColors.btnColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          onPressed: () => dashboardController.updateJobStatus(
-              job.projectId ?? 0, job.bookingNo ?? "", "rejected"),
-          child: Utils.textView("Reject", Get.width * 0.035, CustomColors.white, FontWeight.w700),
-        ),
-      ),
-    ],
-  );
+ return SizedBox();
 
 
 }

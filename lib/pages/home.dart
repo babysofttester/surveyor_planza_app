@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:surveyor_app_planzaa/common/custom_colors.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
+import 'package:surveyor_app_planzaa/controller/status_update_controller.dart';
 import 'package:surveyor_app_planzaa/pages/dashboard.dart';
 import 'package:surveyor_app_planzaa/pages/earning.dart';
 import 'package:surveyor_app_planzaa/pages/profileScreen.dart';
@@ -70,10 +71,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // }
 
   late List<Widget> pages;
+  late StatusUpdateController statusUpdateController;
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(vsync: this);
+    statusUpdateController = Get.put(StatusUpdateController(this));
 
     pageIndex = 0;
 appTitle = "Dashboard";
@@ -154,25 +157,24 @@ bool isOnline = true;
   activeColor: CustomColors.white,
   activeTrackColor: CustomColors.btnColor.withOpacity(0.5),
   onChanged: (value) async {
-    if (value) {
-      // Try to go online — permission is handled inside goOnline()
+    if (value) { 
+      
       final success = await LocationChannel.goOnline();
       if (success) {
-        setState(() { isOnline = true; });
-        Utils.showToast("You are Online");
-      } else {
-        // Permission denied — keep switch OFF, don't loop
-        setState(() { isOnline = false; });
-        Utils.showToast("Location permission is required to go online");
-      }
-    } else { 
-      await LocationChannel.goOffline();
-      setState(() { isOnline = false; }); 
-      Utils.showToast("You are Offline");
+        final apiSuccess = await statusUpdateController.updateOnlineStatus(1);
+        if (apiSuccess) {
+          setState(() { isOnline = true; });
+          Utils.showToast("You are Online");
+        } else {
+          Utils.showToast("Failed to update status. Try again.");
+        }
+      } 
+    } else {
+   
+    
     }
   },
 ),
-
           ],
         ),
       ]

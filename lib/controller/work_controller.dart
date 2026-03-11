@@ -46,19 +46,19 @@ class WorkController extends GetxController {
     loadToken();
     _refreshPendingCount();
     // Auto-sync whenever internet comes back
-    _connectivitySubscription = Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
-      final isOnline = results.any((r) => r != ConnectivityResult.none);
-      if (isOnline) {
-        _autoSyncOfflineQueue();
-      }
-    });
+    // _connectivitySubscription = Connectivity()
+    //     .onConnectivityChanged
+    //     .listen((List<ConnectivityResult> results) {
+    //   final isOnline = results.any((r) => r != ConnectivityResult.none);
+    //   if (isOnline) {
+    //     _autoSyncOfflineQueue();
+    //   }
+    // });
   }
 
   @override
   void onClose() {
-    _connectivitySubscription?.cancel();
+   // _connectivitySubscription?.cancel();
     lengthController.dispose();
     breadthController.dispose();
     descriptionController.dispose();
@@ -91,7 +91,7 @@ class WorkController extends GetxController {
   }
 
   Future<void> submitWork() async {
-    // Validation
+    
     if (projectId.isEmpty || bookingNo.isEmpty) {
       Utils.showToast("Error: Missing job information");
       return;
@@ -139,42 +139,21 @@ if (!isOnline) {
   update();
   await _refreshPendingCount();
 
-  // ✅ Go back to dashboard and mark this booking as pending sync
+  
+
   if (Get.isRegistered<DashboardController>()) {
-    Get.find<DashboardController>().markAsPendingSync(bookingNo);
+    final dc = Get.find<DashboardController>();
+    dc.markAsPendingSync(bookingNo);
+  
   }
 
-  Get.back(); // back to dashboard
+_clearForm();
+  Get.back(); 
   return;
 }
-    // if (!isOnline) {
-    //   //  OFFLINE: save to SQLite 
-    //   await OfflineWorkQueueService.enqueue(
-    //     projectId:   projectId,
-    //     bookingNo:   bookingNo,
-    //     length:      double.tryParse(lengthController.text.trim()) ?? 0.0,
-    //     breadth:     double.tryParse(breadthController.text.trim()) ?? 0.0,
-    //     description: descriptionController.text.trim(),
-    //     imagePaths:  selectedImages.map((f) => f.path).toList(),
-    //   );
-
-    //   isSavedOffline.value = true;
-    //   isLoading.value = false;
-    //   await _refreshPendingCount();
-
-    //   Get.snackbar(
-    //     "Saved Offline",
-    //     "No internet. Work saved locally and will sync automatically.",
-    //     snackPosition: SnackPosition.BOTTOM,
-    //     backgroundColor: Colors.orange,
-    //     colorText: Colors.white,
-    //     duration: const Duration(seconds: 3),
-    //   );
-    //   return;
-    // }
-
-    //  ONLINE: submit to server 
+   
     await _submitToServer(token);
+
   }
 
  
@@ -211,6 +190,11 @@ if (!isOnline) {
 
           if (responseJson['status'] == "success") {
   Utils.showToast("${responseJson['message']}");
+  
+if (Get.isRegistered<DashboardController>()) {
+  final dc = Get.find<DashboardController>();
+  dc.removeJobLocally(bookingNo, int.tryParse(projectId)?? 0);
+}
 
 
   await Future.delayed(const Duration(milliseconds: 500));
@@ -227,9 +211,8 @@ if (!isOnline) {
   isLoading.value = false;
   update();
   
-  await _flushOfflineWorkQueue(token);
 
-  // ✅ Pop back to Home first, THEN call tab change
+  
   Get.back(); 
   await Future.delayed(const Duration(milliseconds: 200));
   onTabChange?.call(1);
@@ -242,7 +225,7 @@ if (!isOnline) {
 // await Future.delayed(const Duration(milliseconds: 100));
 // onTabChange?.call(1); 
 } else {
-            // Server responded but returned failure — save offline as fallback
+            
             Utils.showToast("${responseJson['message']}");
 
             await OfflineWorkQueueService.enqueue(
@@ -255,7 +238,15 @@ if (!isOnline) {
             );
 
             isSavedOffline.value = true;
+              isLoading.value = false;
+            update();
             await _refreshPendingCount();
+
+
+          if (Get.isRegistered<DashboardController>()) {
+  final dc = Get.find<DashboardController>();
+ dc.removeJobLocally(bookingNo, int.tryParse(projectId)?? 0);
+}
 
             Get.snackbar(
               "Saved Offline",
@@ -277,91 +268,6 @@ if (!isOnline) {
     );
   }
 
-  
-  // AUTO SYNC — triggered by connectivity listener
-
-
-  Future<void> _autoSyncOfflineQueue() async {
-    await loadToken();
-    final token = authToken;
-    if (token == null || token.isEmpty) return;
-
-    final count = await OfflineWorkQueueService.pendingCount();
-    if (count == 0) return;
-
-    final isOnline = await _isInternetAvailable();
-    if (!isOnline) return;
-
-    await _flushOfflineWorkQueue(token);
-  }
-
-  // 
-  // FLUSH OFFLINE QUEUE
-  // 
-
-  Future<void> _flushOfflineWorkQueue(String token) async {
-    final pending = await OfflineWorkQueueService.dequeueAll();
-    if (pending.isEmpty) return;
-
-    final failed = <Map<String, dynamic>>[];
-
-    for (final item in pending) {
-      final success = await _submitOfflineItem(item, token);
-      if (!success) failed.add(item);
-    }
-
-    // Re-queue failed items
-    for (final item in failed) {
-      await OfflineWorkQueueService.enqueue(
-        projectId:   item['project_id'] ?? '',
-        bookingNo:   item['booking_no'] ?? '',
-        length:      (item['length'] as num).toDouble(),
-        breadth:     (item['breadth'] as num).toDouble(),
-        description: item['description'] ?? '',
-        imagePaths:  List<String>.from(item['image_paths'] ?? []),
-      );
-    }
-
-    await _refreshPendingCount();
-
-    if (failed.isEmpty && pending.isNotEmpty) {
-  if (Get.isRegistered<WorkHistoryController>()) {
-    Get.find<WorkHistoryController>().fetchWorkHistory();
-  }
-  if (Get.isRegistered<EarningController>()) {
-    Get.find<EarningController>().fetchEarnings();
-  }
-  if (Get.isRegistered<DashboardController>()) {
-    Get.find<DashboardController>().clearPendingSync();
-    Get.find<DashboardController>().fetchDashboard();
-  }
-
-  Get.snackbar(
-    "Synced",
-    "${pending.length} offline submission(s) uploaded successfully.",
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.green,
-    colorText: Colors.white,
-    duration: const Duration(seconds: 3),
-  );
-
-  // ✅ Redirect to Work History after sync
-  await Future.delayed(const Duration(milliseconds: 500));
-  onTabChange?.call(1);
-} else if (failed.isNotEmpty) {
-      Get.snackbar(
-        "Partial Sync",
-        "${pending.length - failed.length} synced, ${failed.length} still pending.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
-    }
-  } 
-
-  // 
-  // SUBMIT A SINGLE OFFLINE ITEM
-  // 
 
   Future<bool> _submitOfflineItem(
       Map<String, dynamic> item, String token) async {
@@ -369,11 +275,11 @@ if (!isOnline) {
       final List<String> imagePaths =
           List<String>.from(item['image_paths'] ?? []);
 
-      // Check if any images still exist on device
+     
       final existingPaths =
           imagePaths.where((p) => File(p).existsSync()).toList();
 
-      // If all images are gone, skip silently (treat as done)
+  
       if (imagePaths.isNotEmpty && existingPaths.isEmpty) {
         Utils.print(
             "Skipping offline item [${item['booking_no']}] — all images deleted from temp storage");

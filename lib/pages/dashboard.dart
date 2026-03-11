@@ -18,15 +18,10 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
 
 
 late DashboardController dashboardController;
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   dashboardController = Get.put(DashboardController(this));
-  // }
+
  @override
 void initState() {
   super.initState();
-  //dashboardController = Get.put(DashboardController(this));
    if (Get.isRegistered<DashboardController>()){
 dashboardController = Get.find<DashboardController>();
    }else {
@@ -50,10 +45,7 @@ dashboardController = Get.find<DashboardController>();
             Expanded(
               child: Obx(() {
         
-          // if (dashboardController == null) {
-          //   return const Center(child: CircularProgressIndicator());
-          // }
-        
+          
           if (dashboardController.jobList.isEmpty) { 
             return const Center(child: Text("No Jobs Available"));
           }
@@ -79,19 +71,38 @@ dashboardController = Get.find<DashboardController>();
   }
 
   Widget _jobCard(JobRequest job, DashboardController controller) {
+   final remainingRx = dashboardController.remainingTimeMap[job.projectId ?? 0];
+
+final bool isExpired =
+    remainingRx != null && remainingRx.value.inSeconds <= 0;
+
+
     return GestureDetector(
+      
       onTap: () {
-        if (job.status == 'accepted' ){
-         Get.to(() => Work(
-            projectId: job.projectId!.toString(),
-          bookingNo: job.bookingNo!,
-          acceptedAt: job.acceptedAt,
-          onTabChange: widget.onTabChange,
-         ));
-        }else {
+
+  if (isExpired) {
+    Utils.showToast('This job is Expired');
+  }
+
+  else if (job.status == 'accepted') {
+    Get.to(() => Work(
+      projectId: job.projectId!.toString(),
+      bookingNo: job.bookingNo!,
+      acceptedAt: job.acceptedAt,
+      onTabChange: widget.onTabChange,
+    ));
+  }
+
+  else if (job.status == 'rejected') {
+    Utils.showToast('This job is Rejected');
+  }
+
+  else {
     Utils.showToast("Accept the job first to start work");
   }
-      },
+
+},
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
@@ -352,7 +363,7 @@ if (status == "accepted") {
     final isExpired = remainingRx.value.inSeconds <= 0;
     if (isExpired) return const SizedBox();
 
-   // return SizedBox();
+   // return SizedBox(); 
 
     return Align(
       alignment: Alignment.centerRight,
@@ -375,7 +386,7 @@ if (status == "accepted") {
   });
 }
   
- return SizedBox();
+ return SizedBox(); 
 
 
 }

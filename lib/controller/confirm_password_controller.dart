@@ -62,13 +62,13 @@ void changePassword() {
 
        if (response.statusCode == 200 && responseJson["status"] == "success") {
           Utils.showToast(responseJson["message"] ?? "Password Updated");
-           // ✅ Use WidgetsBinding to navigate AFTER current frame completes
+           
   WidgetsBinding.instance.addPostFrameCallback((_) {
     // Get.offAll(() => const LoginPage());
      Get.offAll(() => Home()); 
  
   });
-          // ✅ Navigate immediately, no delay
+        
           // Get.offAll(() => const LoginPage());
         } else {
           Utils.showToast(

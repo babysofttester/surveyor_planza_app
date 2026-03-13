@@ -60,7 +60,7 @@ Row(
       onChanged: (value) {
   controller.selectedStatus = value!;
 
-  // 🔥 Clear old selection
+
   controller.selectedProjectId = "";
   controller.selectedJobId = "";
 
@@ -95,7 +95,7 @@ Utils.textView(
 const SizedBox(height: 8),
 
 SearchableDropdown(
-  key: ValueKey(controller.selectedStatus), // 🔥 IMPORTANT
+  key: ValueKey(controller.selectedStatus), 
   hint: "Select Project",
   value: controller.selectedJobId.isEmpty
       ? null

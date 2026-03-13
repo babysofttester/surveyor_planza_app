@@ -21,7 +21,7 @@ class ChangePasswordController extends GetxController {
   Future<void> sendOtp() async {
 
     if (phoneController.text.isEmpty) {
-      Utils.showToast("Error: Please enter Phone Number");
+      Utils.showToast("Please enter Phone Number");
    
       return;
     }

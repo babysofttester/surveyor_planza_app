@@ -99,10 +99,8 @@ class OtpVerifyController extends GetxController {
     Map<String, String> data;
 
     if (isForgotFlow) {
-      // FORGOT PASSWORD FLOW
       data = {"phone": phone.trim(), "otp": otp.trim()};
     } else {
-      // REGISTER FLOW
       String fcmToken = prefs.getString(Constants.fcmToken) ?? "abc";
 
       data = {

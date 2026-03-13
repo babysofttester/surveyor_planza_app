@@ -27,7 +27,7 @@ class _KycScreenState extends State<KycScreen>with SingleTickerProviderStateMixi
     return SafeArea(
       child: Scaffold( 
         backgroundColor: Colors.white,
-        appBar: const CustomAppBar(title:  "KYC "),
+        appBar:  CustomAppBar(title:  "KYC "),
         body: 
             SingleChildScrollView( 
             padding: const EdgeInsets.all(16),

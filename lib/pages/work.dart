@@ -240,7 +240,7 @@ void initState() {
                         _inputField(
                           controller: controller.lengthController,
                           hint: "0.00",
-                          suffix: "Meters",
+                          suffix: "Feet",
                           keyboardType: TextInputType.number,
                         ),
 
@@ -251,7 +251,7 @@ void initState() {
                         _inputField(
                           controller: controller.breadthController,
                           hint: "0.00",
-                          suffix: "Meters",
+                          suffix: "Feet",
                           keyboardType: TextInputType.number,
                         ),
 

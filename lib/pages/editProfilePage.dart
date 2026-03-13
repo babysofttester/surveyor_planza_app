@@ -11,6 +11,7 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:surveyor_app_planzaa/common/appBar.dart';
+import 'package:surveyor_app_planzaa/common/assets.dart';
 import 'package:surveyor_app_planzaa/common/custom_colors.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/controller/profileController.dart';
@@ -57,9 +58,9 @@ void initState() {
     _fillFields();
     profileController.addListener(_fillFields);
     
-  } catch (e, stack) {
+  } catch (e, stack) { 
     print("INIT ERROR: $e");
-    print("STACK: $stack");
+    print("STACK: $stack"); 
   }
 }
 
@@ -71,15 +72,24 @@ void _fillFields() {
   phoneController.text = surveyor.phone ?? '';
   emailController.text = surveyor.email ?? '';
 
+  if (surveyor.currentLat!= null){
+    latitudeController.text = surveyor.currentLat.toString();
+  }
+
+  if (surveyor.currentLng!= null){
+    longitudeController.text = surveyor.currentLng.toString();
+  }
+
   if (surveyor.state != null && surveyor.state!.isNotEmpty) {
     stateCityController.selectedState.value = surveyor.state;
     
 
     stateCityController.fetchCities(surveyor.state!).then((_) {
       if (surveyor.city != null && surveyor.city!.isNotEmpty) {
-        if (stateCityController.cities.contains(surveyor.city)) {
-          stateCityController.selectedCity.value = surveyor.city; 
-        }
+        stateCityController.selectedCity.value=surveyor.city;
+        // if (stateCityController.cities.contains(surveyor.city)) {
+        //   stateCityController.selectedCity.value = surveyor.city; 
+        // }
       }
     });
   }
@@ -94,31 +104,24 @@ void dispose() {
   super.dispose();
 }
 
-  // @override
-  // void dispose() {
-  //   nameController.dispose();
-  //   phoneController.dispose();
-  //   emailController.dispose();
-  //   super.dispose();
-  // }
+
 
   File? profileImageFile;
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> pickImage(ImageSource source) async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: source,
-      imageQuality: 70,
-    );
 
-    if (pickedFile != null) {
-      setState(() {
-        profileImageFile = File(pickedFile.path);
-      });
+Future<void> pickImage(ImageSource source) async {
+  final XFile? pickedFile =
+      await _picker.pickImage(source: source, imageQuality: 70);
 
-      profileController.profileImageFile = profileImageFile;
-    }
+  if (pickedFile != null) {
+    setState(() {
+      profileImageFile = File(pickedFile.path);
+    });
+
+    profileController.profileImageFile = profileImageFile;  
   }
+} 
 
   void showImagePickerOptions() {
     showModalBottomSheet(
@@ -163,7 +166,7 @@ void dispose() {
   late TextEditingController phoneController;
   late TextEditingController emailController;
   final TextEditingController latitudeController = TextEditingController();
-  final TextEditingController longitudeController = TextEditingController();
+  final TextEditingController longitudeController = TextEditingController(); 
 
   @override
   Widget build(BuildContext context) {
@@ -193,16 +196,18 @@ void dispose() {
                           ),
                         ],
                       ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: profileImageFile != null
-                            ? FileImage(profileImageFile!)
-                            : profileController.surveyor?.avatar != null &&
-                                  profileController.surveyor!.avatar!.isNotEmpty
-                            ? NetworkImage(profileController.surveyor!.avatar!)
-                            : const AssetImage("assets/images/profile.png")
-                                  as ImageProvider,
-                      ),
+                      child: 
+                         CircleAvatar(
+  radius: 50,
+  backgroundColor: Colors.grey.shade200,
+  backgroundImage: profileController.profileImageFile != null
+      ? FileImage(profileController.profileImageFile!) as ImageProvider
+      : (profileController.surveyor?.avatar != null &&
+              profileController.surveyor!.avatar!.isNotEmpty)
+          ? NetworkImage(profileController.surveyor!.avatar!)
+          : AssetImage(Assets.profilePNG) as ImageProvider,
+),  
+                    
                     ),
                     Positioned(
                       bottom: 1,
@@ -255,11 +260,9 @@ void dispose() {
                   ),
                   SizedBox(height: Get.height * 0.02),
 
-                  /// STATE
                   Row(
   children: [
 
-    /// STATE
     Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +294,6 @@ void dispose() {
 
     const SizedBox(width: 12),
 
-    /// DISTRICT
     Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,8 +328,7 @@ void dispose() {
      SizedBox(height: Get.height * 0.02),
                   // const SizedBox(height: 12),
 
- //lat long
-                //lat long
+
                     Column(
                       children: [
                         SizedBox(
@@ -337,10 +338,8 @@ void dispose() {
                             onPressed: () async {
                               if (stateCityController.selectedState.value == null ||
                                   stateCityController.selectedCity.value == null) {
-                                Get.snackbar(
-                                  "Error",
-                                  "Please select state and district first",
-                                );
+                                    Utils.showToast('Please select state and district first');
+                               
                                 return;
                               }
 
@@ -351,10 +350,8 @@ void dispose() {
                                   await locationFromAddress(address);
 
                               if (locations.isEmpty) {
-                                Get.snackbar( 
-                                  "Error",
-                                  "Unable to find district location",
-                                );
+                                Utils.showToast('Unable to find district location');
+                               
                                 return;
                               }
 
@@ -501,7 +498,7 @@ void dispose() {
                     hint: "Enter email",
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
-                    readOnly: false,
+                    readOnly: true,
                   ),
                 ],
               ),
@@ -526,8 +523,12 @@ void dispose() {
 
   profileController.updateProfile(
     name: nameController.text.trim(),
-    email: emailController.text.trim(),
+   // email: emailController.text.trim(),
     image: profileImageFile,
+    lat: latitudeController.text.trim(),
+    long: longitudeController.text.trim(),
+
+
   );
 },
                   child: Utils.textView(

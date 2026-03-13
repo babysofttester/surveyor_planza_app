@@ -196,12 +196,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     phone: loginController.emailController.text,
                                   ),
                                 );
-                                /*    Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChangePassword(phone: loginController.emailController.text,),
-            ),
-          ); */
+                              
                               },
                               child: Utils.textView(
                                 "Forgot Password?",

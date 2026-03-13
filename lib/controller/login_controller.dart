@@ -72,12 +72,12 @@ Future<void> login() async {
   final password = passwordController.text.trim();
 
   if (email.isEmpty) {
-    Utils.showToast("Error: Please enter email");
+    Utils.showToast("Please enter email");
     return;
   }
 
   if (password.isEmpty) {
-    Utils.showToast("Error: Please enter password");
+    Utils.showToast("Please enter password");
     return;
   }
  if (_isDisposed) return;
@@ -118,6 +118,7 @@ loginResponseModel.value =
 int isVerified = loginResponseModel.value.data?.isVerified ?? 0;
 int isRejected = loginResponseModel.value.data?.isRejected ?? 0;
 int isPending = loginResponseModel.value.data?.isPending ?? 0;
+int isNotCompleted = loginResponseModel.value.data?.isNotCompleted ?? 0;
 
 if (isVerified == 1) {
 
@@ -138,10 +139,13 @@ if (isVerified == 1) {
     "Please wait until our team verifies your documents."
   ); 
 
-} else {
+} else if(isNotCompleted == 1){
+  Get.offAll(()=> const KycScreen());
+}
 
-  
-  Get.offAll(() => const KycScreen());
+
+ else {
+   Get.offAll(() => const KycScreen()); 
  
 }
       

@@ -34,13 +34,15 @@ class Data {
   int? isVerified;
   int? isRejected;
   int? isPending;
+  int? isNotCompleted;
 
   Data(
       {this.token,
       this.surveyor,
       this.isVerified,
       this.isRejected,
-      this.isPending});
+      this.isPending,
+      this.isNotCompleted});
 
   Data.fromJson(Map<String, dynamic> json) {
     token = json['token'];
@@ -50,6 +52,7 @@ class Data {
     isVerified = json['is_verified'];
     isRejected = json['is_rejected'];
     isPending = json['is_pending'];
+    isNotCompleted = json['is_notCompleted'];
   }
 
   Map<String, dynamic> toJson() {
@@ -61,6 +64,7 @@ class Data {
     data['is_verified'] = this.isVerified;
     data['is_rejected'] = this.isRejected;
     data['is_pending'] = this.isPending;
+    data['is_notCompleted']= this.isNotCompleted;
     return data;
   }
 }

@@ -74,8 +74,8 @@ Future<void> fetchCities(String state) async {
     return;
   }
 
-  cities.clear();
-  selectedCity.value = null;
+  //cities.clear();
+  // selectedCity.value = null;
 
   Map<String, String> data = {
     "state": state,
@@ -110,8 +110,8 @@ Future<void> fetchCities(String state) async {
     },
     token: token,
      // token: authToken ?? "", 
-   // method: HttpMethod.post, // if required
-  );
+  
+  ); 
 }
 
 }

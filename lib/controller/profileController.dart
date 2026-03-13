@@ -37,7 +37,9 @@ Future<void> onInit() async {
   authToken = prefs.getString(Constants.AUTH_TOKEN);
 
   if (authToken != null && authToken!.isNotEmpty) {
-    // ✅ Widget tree build hone ke baad call karo
+      print("PROFILE TOKEN: $authToken");
+    print("FETCHED AVATAR: ${surveyor?.avatar}");
+   
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchProfile();
     });
@@ -51,7 +53,7 @@ Future<void> onInit() async {
   final RxnString selectedCity = RxnString();
 
 
-  // ✅ FETCH PROFILE
+
   void fetchProfile() {
     callWebApiGet(
      
@@ -91,15 +93,17 @@ Future<void> onInit() async {
 
  
  
-  // ✅ UPDATE PROFILE
+
 Future<void> updateProfile({
   required String name,
-  required String email,
+//  required String email,
   File? image,
+  String? lat,
+  String? long,
 }) async {
 
 
-  // ✅ State & City validation
+ 
   final state = selectedState.value;
   final city = selectedCity.value;
 
@@ -123,15 +127,15 @@ Future<void> updateProfile({
 
     // request.fields['id'] = userId;
     request.fields['name'] = name;
-    request.fields['email'] = email;
+    //request.fields['email'] = email;
     request.fields['state'] = state;        
     request.fields['city'] = city;           
-    request.fields['current_lat'] = latController.text.trim();  
-    request.fields['current_lng'] = lngController.text.trim(); 
+    request.fields['current_lat'] = lat??'';  
+    request.fields['current_lng'] = long??''; 
 
     if (image != null) {
       request.files.add(
-        await http.MultipartFile.fromPath('image', image.path),
+        await http.MultipartFile.fromPath('avatar', image.path), 
       );
     }
 
@@ -143,7 +147,7 @@ Future<void> updateProfile({
 
   final result = EditProfileResponseModel.fromJson(jsonResponse);
 
-  if (result.status == "success") {
+  if (result.status == "success") { 
     Utils.showToast(result.message ?? "Profile Updated Successfully");
     fetchProfile();
     Get.back();

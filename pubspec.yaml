@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
-environment:
+environment: 
   sdk: ^3.10.7
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -76,7 +76,6 @@ dependencies:
   dotted_border: ^3.1.0
   reorderables: ^0.6.0 
   geocoding: ^2.1.1
-  # workmanager: ^0.9.0+3
   sqflite: ^2.4.2
  
  
@@ -86,6 +85,15 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.1.0
+  flutter_lints: ^6.0.0
+flutter_icons:
+  android: "launcher_icon"
+  ios: true 
+  image_path: "assets/images/logo.png"
+ 
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -124,6 +132,12 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  fonts:
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans_18pt-Regular.ttf
+        - asset: assets/fonts/DMSans_24pt-Medium.ttf
+        - asset: assets/fonts/DMSans_18pt-Bold.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:

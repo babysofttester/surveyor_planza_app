@@ -8,6 +8,7 @@ import 'package:surveyor_app_planzaa/common/custom_colors.dart';
 import 'package:surveyor_app_planzaa/common/utils.dart';
 import 'package:surveyor_app_planzaa/pages/earning.dart';
 import 'package:surveyor_app_planzaa/pages/login_page.dart';
+import 'package:surveyor_app_planzaa/pages/privacy_policy.dart';
 import 'package:surveyor_app_planzaa/pages/supportScreen.dart';
 
 import '../controller/profileController.dart';
@@ -26,17 +27,21 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
    with TickerProviderStateMixin {
   late final ProfileController controller; 
-  final ImagePicker _picker = ImagePicker();
+  
+
 
 @override
 void initState() {
   super.initState();
  
-  if (Get.isRegistered<ProfileController>()) {
-    Get.delete<ProfileController>(force: true); 
-  }
-  controller = Get.put(ProfileController(this));
+
+  controller = Get.put(ProfileController(this)); 
+  
 }
+
+
+  File? profileImageFile;
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> pickImage(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -45,10 +50,21 @@ void initState() {
     );
 
     if (pickedFile != null) {
-      // controller.profileImageFile = File(pickedFile.path);
-      controller.update(); // refresh UI
+      controller.profileImageFile = File(pickedFile.path);
+      controller.update();  
     }
-  }
+  } 
+  // Future<void> pickImage(ImageSource source) async {
+  //   final XFile? pickedFile = await _picker.pickImage(
+  //     source: source,
+  //     imageQuality: 70,
+  //   );
+
+  //   if (pickedFile != null) {
+  //     // controller.profileImageFile = File(pickedFile.path);
+  //     controller.update(); 
+  //   }
+  // }
 
   void showImagePickerOptions() {
     showModalBottomSheet(
@@ -102,9 +118,22 @@ void initState() {
         
                 GetBuilder<ProfileController>(
                   builder: (controller) {
-                    ImageProvider imageProvider;
+                    ImageProvider imageProvider; 
 
-                 
+                  if (controller.profileImageFile != null) {
+                      imageProvider = FileImage(controller.profileImageFile!);
+
+                     
+                    } else if (controller.surveyor?.avatar != null &&
+                        controller.surveyor!.avatar!.isNotEmpty) {
+                      imageProvider = NetworkImage(
+                        controller.surveyor!.avatar!, 
+                      );
+
+                     
+                    } else { 
+                      imageProvider = AssetImage(Assets.profilePNG);
+                    }
       
                     return GestureDetector(
                       onTap: () {
@@ -121,21 +150,18 @@ void initState() {
   width: 80,
   child: Stack(
     children: [
-      CircleAvatar(
-  radius: 40,
-  backgroundColor: Colors.grey.shade200,
-  backgroundImage: controller.surveyor?.avatar != null &&
-          controller.surveyor!.avatar!.isNotEmpty
-      ? NetworkImage(controller.surveyor!.avatar!)
-      : null,
-  child: controller.surveyor?.avatar == null ||
-          controller.surveyor!.avatar!.isEmpty
-      ? Image.asset(
-          Assets.profilePNG,
-          fit: BoxFit.cover,
-        ) 
-      : null,
-),
+       CircleAvatar(
+                        radius: 40,
+
+                        backgroundImage: controller.profileImageFile != null
+                            ? FileImage(controller.profileImageFile!)
+                            : controller.surveyor?.avatar != null &&
+                                  controller.surveyor!.avatar!.isNotEmpty
+                            ? NetworkImage(controller.surveyor!.avatar!)
+                            : const AssetImage("assets/images/profile.png")
+                                  as ImageProvider,  
+                      ),
+
 
       Positioned(
         bottom: 0,
@@ -216,7 +242,7 @@ void initState() {
                 }),
 
                 _menuItem(Icons.privacy_tip_outlined, "Privacy Policy", () {
-                  Get.to(() => const SupportScreen());
+                  Get.to(() => const PrivacyPolicy()); 
                 }),
 
                 _menuItem(Icons.logout, "Logout", () {

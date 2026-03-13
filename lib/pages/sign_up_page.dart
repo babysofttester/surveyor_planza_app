@@ -160,6 +160,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
         color: CustomColors.outlineGrey,
       ),
       onPressed: () {
+        
        signUpController.isPasswordVisible.value =
     !signUpController.isPasswordVisible.value; 
       },
@@ -180,20 +181,20 @@ SizedBox(height: Get.height * 0.03),
         FilteringTextInputFormatter.singleLineFormatter,
     hintText: "Confirm Password",
     maxLength: 999,
-    obscureText: !signUpController.isPasswordVisible.value,
+    obscureText: !signUpController.isConfirmPasswordVisible.value,
     obscure: true,
     onChanged: () {},
 
     suffixIcon: IconButton(
       icon: Icon(
-        signUpController.isPasswordVisible.value
+        signUpController.isConfirmPasswordVisible.value
             ? Icons.visibility
             : Icons.visibility_off,
         color: CustomColors.outlineGrey,
       ),
-      onPressed: () {
-       signUpController.isPasswordVisible.value =
-    !signUpController.isPasswordVisible.value; 
+      onPressed: () { 
+       signUpController.isConfirmPasswordVisible.value =
+    !signUpController.isConfirmPasswordVisible.value; 
       },
     ),
   ),
@@ -217,7 +218,7 @@ SizedBox(height: Get.height * 0.03),
 
                       
 
-                      SizedBox(height: Get.height * 0.03),
+                      SizedBox(height: Get.height * 0.03), 
                       
 
                       SizedBox(

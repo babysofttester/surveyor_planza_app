@@ -33,6 +33,7 @@ class SignUpController extends GetxController {
 
 
 RxBool isPasswordVisible = false.obs;
+RxBool isConfirmPasswordVisible = false.obs;
 
   register() async {
     final email = emailController.text.trim();
@@ -40,14 +41,28 @@ RxBool isPasswordVisible = false.obs;
     final name = nameController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirnPasswordController.text.trim();
+  if (password.length < 8) {
+    Utils.showToast("Password must be at least 8 characters long");
+    return;
+  }
 
+  if (password != confirmPassword) {
+    Utils.showToast("Passwords do not match");
+    return;
+  }  
     if (email.isEmpty || phone.isEmpty || name.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-        Utils.showToast("Error: All fields are required"); 
-      // Get.snackbar("Error", "Email and phone are required");
+        Utils.showToast("All fields are required to fill"); 
+      
       return;
     }
 
-    Map<String, String> data = {'email': email, "phone": phone, "name": name, "password": password, "confirm_password": confirmPassword };
+    Map<String, String> data = {
+      'email': email,
+       "phone": phone, 
+       "name": name,
+        "password": password, 
+        "confirm_password": confirmPassword  
+        };
 
     callWebApi(
       _tickerProvider,

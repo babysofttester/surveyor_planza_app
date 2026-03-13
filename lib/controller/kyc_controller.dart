@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:surveyor_app_planzaa/common/web_service.dart';
 import 'package:surveyor_app_planzaa/pages/home.dart';
+import 'package:surveyor_app_planzaa/pages/login_page.dart';
 
 
 class KycController extends GetxController {
@@ -121,7 +122,7 @@ Future<void> submitKyc() async {
   if (model.status == "success") {
 
     Utils.showToast(model.message ?? "KYC Submitted");
-    Get.offAll(() => Home());
+    Get.offAll(() => LoginPage());  
 
   } else {
     Utils.showToast(model.message ?? "KYC Failed");

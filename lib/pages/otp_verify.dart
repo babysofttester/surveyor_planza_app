@@ -34,22 +34,41 @@ class OtpVerify extends StatefulWidget {
 class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
   late OtpVerifyController otpVerifyController;
 
+
+void clearOtp() {
+  for (var controller in _otpControllers) {
+    controller.clear();
+  }
+ 
+  _focusNodes[0].requestFocus();
+}
+
   @override
   void initState() {
     super.initState();
-    // pass the additional flag expected by the controller (e.g. forgot‐password flow)
-    otpVerifyController = Get.put(
-      OtpVerifyController(widget.email, this, widget.isForgotFlow),
-    );
+  
+      otpVerifyController = Get.put(
+    OtpVerifyController(
+      widget.email,
+      this,
+      widget.isForgotFlow,
+      name: widget.name ?? "",       
+      phone: widget.phone ?? "",      
+      password: widget.password ?? "", 
+    ),
+  );
+
+  otpVerifyController.onResendSuccess=(){
+    clearOtp();
+  };
   }
 
-  // 6 controllers for 6 OTP digits
+
   final List<TextEditingController> _otpControllers = List.generate(
     6,
     (_) => TextEditingController(),
   );
 
-  // 6 focus nodes to control focus between fields
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
@@ -206,7 +225,7 @@ class _OtpVerifyState extends State<OtpVerify> with TickerProviderStateMixin {
                             //  backgroundColor: Colors.blue,
                             backgroundColor: otpVerifyController.canResend.value
                                 ? const Color(0xFF3AAFA9)
-                                : Colors.grey, // disabled color
+                                : Colors.grey, 
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 8,

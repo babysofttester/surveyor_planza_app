@@ -19,6 +19,8 @@ class OtpVerifyController extends GetxController {
   late SharedPreferences prefs;
   final TickerProvider _tickerProvider;
 
+    VoidCallback? onResendSuccess;
+
   final secondsRemaining = 30.obs;
   final canResend = false.obs;
 
@@ -27,16 +29,35 @@ class OtpVerifyController extends GetxController {
   String email;
   final bool isForgotFlow;
 
-  OtpVerifyController(this.email, this._tickerProvider, this.isForgotFlow);
+    final String name;
+  final String phone;
+  final String password;
+
+
+  OtpVerifyController(
+    this.email, 
+    this._tickerProvider, 
+    this.isForgotFlow,{
+    this.name = "",
+    this.phone= "",
+    this.password="",
+    }
+    
+    );
 
   Rx<LoginResponseModel> loginResponseModel = LoginResponseModel().obs;
+ 
 
   @override
   Future<void> onInit() async {
     super.onInit();
     prefs = await SharedPreferences.getInstance();
+   
+   
     _startTimer();
   }
+
+ 
 
   // ---------------- TIMER ----------------
   void _startTimer() {
@@ -55,34 +76,42 @@ class OtpVerifyController extends GetxController {
   }
 
   //resend otp
-  resendOtp() async {
-    Map<String, String> data = {'email': email};
+resendOtp() async {
+  print("DEBUG => email:$email | name:$name | phone:$phone | password:$password");
 
-    api.callWebApi(
-      _tickerProvider,
-      ApiEndpoints.login,
-      data,
-      onResponse: (http.Response response) async {
-        var responseJson = jsonDecode(response.body);
-        try {
-          loginResponseModel.value = LoginResponseModel.fromJson(responseJson);
-          if (loginResponseModel.value.status == "success") {
-          } else if (loginResponseModel.value.error == null ||
-              loginResponseModel.value.error == "") {
-            Utils.showToast("${loginResponseModel.value.error}");
-          }
-        } catch (e) {
-          LoaderManager.hideLoader();
-          e.printError();
-          e.printInfo();
-          Utils.print(e.toString());
+  Map<String, String> data = {
+    'email': email,
+    'name': name,
+    'phone': phone,
+    'password': password, 
+    'password_confirmation': password,
+  };
+
+  callMultipartWebApi(
+    _tickerProvider,
+    ApiEndpoints.register,
+    data,
+    [],
+    onResponse: (response) async {
+      var responseJson = jsonDecode(response.body);
+      try {
+        if (responseJson["status"] == "success") {
+          Utils.showToast("OTP resent successfully");
+          onResendSuccess?.call(); // ✅ clear OTP fields via callback
+          _startTimer();
+        } else {
+          Utils.showToast(responseJson["message"] ?? "Failed to resend OTP");
         }
+      } catch (e) {
+        LoaderManager.hideLoader();
+        Utils.print(e.toString());
+      }
+    },
+    token: "",
+  );
 
-        Utils.print("sign in controller %%%%%%%%%%%%%%%%%%%% ");
-      },
-      token: "",
-    );
-  }
+
+}
 
   // ---------------- VERIFY OTP ----------------
   Future<void> verifyOtp({

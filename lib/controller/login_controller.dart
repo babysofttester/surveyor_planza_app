@@ -38,7 +38,7 @@ RxBool isPasswordVisible = false.obs;
   @override
   Future<void> onInit() async {
     super.onInit();
-     // ✅ Initialize here
+     
     emailController = TextEditingController();
     passwordController = TextEditingController();
 
@@ -130,7 +130,10 @@ if (isVerified == 1) {
 
   Get.offAll(() => const KycScreen());
 
-} else if (isPending == 1) {
+} else if(isNotCompleted == 1){
+  Get.offAll(()=> const KycScreen());
+}
+else if (isPending == 1) {  
 
   
   
@@ -139,9 +142,7 @@ if (isVerified == 1) {
     "Please wait until our team verifies your documents."
   ); 
 
-} else if(isNotCompleted == 1){
-  Get.offAll(()=> const KycScreen());
-}
+} 
 
 
  else {
@@ -154,6 +155,7 @@ if (isVerified == 1) {
 print("isVerified: $isVerified");
 print("isRejected: $isRejected");
 print("isPending: $isPending");
+print("isNotCompleted: $isNotCompleted");
     } else {
      
       Utils.showToast(

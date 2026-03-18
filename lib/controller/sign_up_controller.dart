@@ -41,6 +41,57 @@ RxBool isConfirmPasswordVisible = false.obs;
     final name = nameController.text.trim();
     final password = passwordController.text.trim();
     final confirmPassword = confirnPasswordController.text.trim();
+
+  if (name.isEmpty) {
+    Utils.showToast("Please enter your full name");
+    return;
+  }
+
+  if (email.isEmpty) {
+    Utils.showToast("Please enter your email");
+    return;
+  }
+
+  // if (!GetUtils.isEmail(email)) {
+  //   Utils.showToast("Please enter a valid email");
+  //   return;
+  // }
+
+  if (phone.isEmpty) {
+    Utils.showToast("Please enter your mobile number");
+    return;
+  }
+
+  // if (!GetUtils.isPhoneNumber(phone) || phone.length != 10) {
+  //   Utils.showToast("Please enter a valid 10-digit mobile number");
+  //   return;
+  // }
+
+  if (password.isEmpty) {
+    Utils.showToast("Please enter password");
+    return;
+  }
+
+  if (password.length < 8) {
+    Utils.showToast("Password must be at least 8 characters long");
+    return;
+  }
+
+  
+  // if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$').hasMatch(password)) {
+  //   Utils.showToast("Password must contain uppercase, lowercase & number");
+  //   return;
+  // }
+
+  if (confirmPassword.isEmpty) {
+    Utils.showToast("Please confirm your password");
+    return;
+  }
+
+  if (password != confirmPassword) {
+    Utils.showToast("Passwords do not match");
+    return;
+  }
   if (password.length < 8) {
     Utils.showToast("Password must be at least 8 characters long");
     return;

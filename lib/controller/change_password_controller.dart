@@ -52,10 +52,10 @@ class ChangePasswordController extends GetxController {
           
          Get.to(() => OtpVerify(
   email: '',
-  name: '',
-  phone: phoneController.text.trim(),
-  password: '',
-  confirmPassword: '',
+  name: null,
+  phone: phoneController.text,
+  password: null,
+  confirmPassword: null,
   isForgotFlow: true,
 ));
         } else {

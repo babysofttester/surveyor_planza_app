@@ -77,7 +77,38 @@ class OtpVerifyController extends GetxController {
 
   //resend otp
 resendOtp() async {
-  print("DEBUG => email:$email | name:$name | phone:$phone | password:$password");
+
+  if(isForgotFlow){
+    print("Debug => phone:$phone");
+
+    Map<String, String> data = {
+      'phone': phone,
+    };
+     callMultipartWebApi(
+      _tickerProvider, 
+      ApiEndpoints.forgotPassword, 
+      data,
+      [],
+      onResponse: (response) async {
+        var responseJson = jsonDecode(response.body);
+        try {
+          if (responseJson["status"] == "success") {
+            Utils.showToast("OTP resent successfully");
+            onResendSuccess?.call();
+            _startTimer();
+          } else {
+            Utils.showToast("Incorrect OTP");
+          }
+        } catch (e) {
+          LoaderManager.hideLoader();
+          Utils.print(e.toString());
+        }
+      },
+      token: "",
+    );
+
+  }else {
+ print("DEBUG => email:$email | name:$name | phone:$phone | password:$password");
 
   Map<String, String> data = {
     'email': email,
@@ -97,7 +128,7 @@ resendOtp() async {
       try {
         if (responseJson["status"] == "success") {
           Utils.showToast("OTP resent successfully");
-          onResendSuccess?.call(); // ✅ clear OTP fields via callback
+          onResendSuccess?.call(); 
           _startTimer();
         } else {
           Utils.showToast(responseJson["message"] ?? "Failed to resend OTP");
@@ -110,6 +141,8 @@ resendOtp() async {
     token: "",
   );
 
+  }
+ 
 
 }
 
@@ -166,7 +199,7 @@ resendOtp() async {
             Get.to(() => KycScreen());
           }
         } else {
-          Utils.showToast(responseJson["message"] ?? "Verification failed");
+          Utils.showToast("Incorrect OTP");
         }
       },
       token: '',
